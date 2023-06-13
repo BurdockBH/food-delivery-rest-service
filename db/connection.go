@@ -12,6 +12,7 @@ func Connect(cfg *config.Config) (*sql.DB, error) {
 	connectionString := fmt.Sprintf("%s:%s@tcp(%s:%s)/%s",
 		cfg.DBUsername, cfg.DBPassword, cfg.DBHost, cfg.DBPort, cfg.DBName)
 
+	// Add validation for db fields
 	db, err := sql.Open("mysql", connectionString)
 	if err != nil {
 		return nil, fmt.Errorf("failed to connect to database: %w", err)
@@ -19,10 +20,9 @@ func Connect(cfg *config.Config) (*sql.DB, error) {
 
 	err = db.Ping()
 	if err != nil {
-		db.Close()
+		defer db.Close()
 		return nil, fmt.Errorf("failed to ping database: %w", err)
 	}
 
 	return db, nil
-
 }
