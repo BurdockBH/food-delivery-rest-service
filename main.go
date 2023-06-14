@@ -22,6 +22,6 @@ func main() {
 	defer dbConnected.Close()
 
 	r := router.InitializeRouter()
-	fmt.Print("Server is running on port 8080")
+	fmt.Print("Server is running on port 8080\n")
 	log.Fatal(http.ListenAndServe(":8080", r))
 }
