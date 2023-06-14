@@ -20,18 +20,19 @@ func RegisterUser(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		http.Error(w, "Failed to decode request body", http.StatusBadRequest)
 	}
+	defer r.Body.Close()
 
-	v, errString := u.Validate(&u)
+	v, errString := u.Validate()
 	if !v {
 		http.Error(w, errString, http.StatusBadRequest)
 		return
 	}
 
-	repository := user.UserRepository{}
-	err = repository.RegisterUser(u)
+	err = user.RegisterUser(u)
 	if err != nil {
 		http.Error(w, "Failed to register user", http.StatusInternalServerError)
 		return
 	}
+
 	fmt.Fprintf(w, "User registered successfully!")
 }
