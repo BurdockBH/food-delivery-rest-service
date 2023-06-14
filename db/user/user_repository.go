@@ -4,6 +4,7 @@ import (
 	"errors"
 	"github.com/BurdockBH/food-delivery-rest-service/db"
 	"github.com/BurdockBH/food-delivery-rest-service/viewmodels"
+	"golang.org/x/crypto/bcrypt"
 	"log"
 	"time"
 )
@@ -22,8 +23,14 @@ func RegisterUser(u viewmodels.User) error {
 		return errors.New("user with that email already exists")
 	}
 
+	hashedPassword, err := hashPassword(u.Password)
+	if err != nil {
+		println("Error hashing password:", err)
+		return err
+	}
+
 	query := "INSERT INTO users (name, email, phone, password, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?)"
-	database, err := db.DB.Exec(query, u.Name, u.Email, u.Phone, u.Password, time.Now().Unix(), time.Now().Unix())
+	database, err := db.DB.Exec(query, u.Name, u.Email, u.Phone, hashedPassword, time.Now().Unix(), time.Now().Unix())
 	if err != nil {
 		log.Printf("Failed to create user with name %v. error is %v \n ", u.Name, err)
 		return err
@@ -41,4 +48,13 @@ func RegisterUser(u viewmodels.User) error {
 	}
 
 	return nil
+}
+
+func hashPassword(password string) (string, error) {
+	// Generate a hash of the password
+	hash, err := bcrypt.GenerateFromPassword([]byte(password), bcrypt.DefaultCost)
+	if err != nil {
+		return "", err
+	}
+	return string(hash), nil
 }
