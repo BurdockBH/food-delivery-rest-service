@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"github.com/BurdockBH/food-delivery-rest-service/db/user"
 	"github.com/BurdockBH/food-delivery-rest-service/viewmodels"
+	"log"
 	"net/http"
 )
 
@@ -22,8 +23,8 @@ func RegisterUser(w http.ResponseWriter, r *http.Request) {
 	}
 	defer r.Body.Close()
 
-	v, errString := u.Validate()
-	if !v {
+	validRequest, errString := u.Validate()
+	if !validRequest {
 		http.Error(w, errString, http.StatusBadRequest)
 		return
 	}
@@ -31,8 +32,11 @@ func RegisterUser(w http.ResponseWriter, r *http.Request) {
 	err = user.RegisterUser(u)
 	if err != nil {
 		http.Error(w, "Failed to register user", http.StatusInternalServerError)
+		log.Println("Failed to register user:", err)
 		return
 	}
 
+	w.WriteHeader(http.StatusOK)
 	fmt.Fprintf(w, "User registered successfully!")
+
 }

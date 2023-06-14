@@ -15,10 +15,11 @@ func main() {
 		log.Fatal("cannot load config:", err)
 	}
 
-	_, err = db.Connect(cfg)
+	dbConnected, err := db.Connect(cfg)
 	if err != nil {
 		log.Fatal("cannot connect to db:", err)
 	}
+	defer dbConnected.Close()
 
 	r := router.InitializeRouter()
 	fmt.Print("Server is running on port 8080")
