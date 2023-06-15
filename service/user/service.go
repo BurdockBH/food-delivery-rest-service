@@ -4,14 +4,11 @@ import (
 	"encoding/json"
 	"fmt"
 	"github.com/BurdockBH/food-delivery-rest-service/db/user"
+	"github.com/BurdockBH/food-delivery-rest-service/router/helper"
 	"github.com/BurdockBH/food-delivery-rest-service/viewmodels"
-	"github.com/golang-jwt/jwt/v5"
-	"github.com/joho/godotenv"
 	"log"
 	"net/http"
-	"os"
 	"strings"
-	"time"
 )
 
 // RegisterUser registers a new user in the database
@@ -62,7 +59,7 @@ func LoginUser(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	token, err := GenerateToken(userLogin.Email)
+	token, err := helper.GenerateToken(userLogin.Email)
 	if err != nil {
 		log.Println("Failed to generate token:", err)
 		http.Error(w, fmt.Sprintf(`"status" : "Failed to generate token: %v"}`, err), http.StatusInternalServerError)
@@ -88,7 +85,6 @@ func LoginUser(w http.ResponseWriter, r *http.Request) {
 }
 
 func DeleteUser(w http.ResponseWriter, r *http.Request) {
-
 	tokenString := r.Header.Get("Authorization")
 	if tokenString == "" {
 		log.Println("Token not found")
@@ -98,32 +94,16 @@ func DeleteUser(w http.ResponseWriter, r *http.Request) {
 
 	tokenString = strings.Replace(tokenString, "Bearer ", "", 1)
 
-	err := godotenv.Load()
+	claims, err := helper.ValidateToken(tokenString)
 	if err != nil {
-		log.Println("Failed to load .env file:", err)
-		http.Error(w, `{"status" : "Failed to load .env file"`, http.StatusInternalServerError)
-		return
-	}
-
-	// Retrieve the JWT secret key from the environment variable
-	jwtSecret := []byte(os.Getenv("JWT_SECRET"))
-
-	token, err := jwt.Parse(tokenString, func(token *jwt.Token) (interface{}, error) {
-
-		if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
-			return nil, fmt.Errorf("unexpected signing method: %v", token.Header["alg"])
-		}
-		return jwtSecret, nil
-	})
-	if err != nil {
-		log.Println("Failed to parse token:", err)
-		http.Error(w, fmt.Sprintf(`{"status": "Failed to parse token: %v"}`, err), http.StatusInternalServerError)
+		log.Println("Token validation failed:", err)
+		http.Error(w, fmt.Sprintf(`{"status" : "Token validation failed: %v"}`, err), http.StatusInternalServerError)
 		return
 	}
 
 	var u viewmodels.UserLogin
 
-	if _, ok := token.Claims.(jwt.MapClaims); ok && token.Valid {
+	if _, ok := claims["email"]; ok {
 
 		err := json.NewDecoder(r.Body).Decode(&u)
 		if err != nil {
@@ -139,6 +119,7 @@ func DeleteUser(w http.ResponseWriter, r *http.Request) {
 			http.Error(w, fmt.Sprintf(`{"status" : "Failed to delete user: %v"}`, err), http.StatusInternalServerError)
 			return
 		}
+
 		w.WriteHeader(http.StatusOK)
 		log.Println("User deleted successfully!")
 		fmt.Fprintf(w, `{"status" : "User deleted successfully!"}`)
@@ -147,27 +128,4 @@ func DeleteUser(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, fmt.Sprintf(`{"status" : "Invalid token for user %v"}`, u.Email), http.StatusBadRequest)
 		return
 	}
-}
-
-// GenerateToken Token generation when user logs in
-func GenerateToken(email string) (string, error) {
-	token := jwt.New(jwt.SigningMethodHS256)
-
-	err := godotenv.Load()
-	if err != nil {
-		return "Failed to load .env", err
-	}
-	jwtSecret := []byte(os.Getenv("JWT_SECRET"))
-
-	claims := token.Claims.(jwt.MapClaims)
-	claims["email"] = email
-	claims["exp"] = time.Now().Add(time.Hour * 24).Unix()
-
-	tokenString, err := token.SignedString(jwtSecret)
-	if err != nil {
-		println("Failed to sign token:", err)
-		return "Failed to sign token:", err
-	}
-
-	return tokenString, nil
 }
