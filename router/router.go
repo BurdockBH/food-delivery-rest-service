@@ -11,6 +11,7 @@ func InitializeRouter() *http.ServeMux {
 	//TODO: Add more routes here
 	router.HandleFunc("/api/register", user.RegisterUser)
 	router.HandleFunc("/api/login", user.LoginUser)
+	router.HandleFunc("/api/delete-user", user.DeleteUser)
 
 	return router
 }

@@ -8,6 +8,7 @@ import (
 	"github.com/golang-jwt/jwt/v5"
 	"log"
 	"net/http"
+	"strings"
 	"time"
 )
 
@@ -91,6 +92,60 @@ func LoginUser(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		log.Println("Failed to write response:", err)
 		http.Error(w, fmt.Sprintf("Failed to write response: %v", err), http.StatusInternalServerError)
+		return
+	}
+}
+
+func DeleteUser(w http.ResponseWriter, r *http.Request) {
+	if r.Method != http.MethodDelete {
+		http.NotFound(w, r)
+		return
+	}
+
+	tokenString := r.Header.Get("Authorization")
+	if tokenString == "" {
+		log.Println("Token not found")
+		http.Error(w, "Token not found", http.StatusBadRequest)
+		return
+	}
+
+	tokenString = strings.Replace(tokenString, "Bearer ", "", 1)
+
+	token, err := jwt.Parse(tokenString, func(token *jwt.Token) (interface{}, error) {
+		if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
+			return nil, fmt.Errorf("unexpected signing method: %v", token.Header["alg"])
+		}
+		return jwtSecret, nil
+	})
+	if err != nil {
+		log.Println("Failed to parse token:", err)
+		http.Error(w, fmt.Sprintf(`{"status": "Failed to parse token: %v"}`, err), http.StatusInternalServerError)
+		return
+	}
+
+	if _, ok := token.Claims.(jwt.MapClaims); ok && token.Valid {
+		var u viewmodels.UserLogin
+
+		err := json.NewDecoder(r.Body).Decode(&u)
+		if err != nil {
+			log.Println("Failed to decode request body:", err)
+			http.Error(w, "Failed to decode request body", http.StatusBadRequest)
+			return
+		}
+		defer r.Body.Close()
+
+		err = user.DeleteUser(u)
+		if err != nil {
+			log.Println("Failed to delete user:", err)
+			http.Error(w, fmt.Sprintf("Failed to delete user: %v", err), http.StatusInternalServerError)
+			return
+		}
+		w.WriteHeader(http.StatusOK)
+		log.Println("User deleted successfully!")
+		fmt.Fprintf(w, "User deleted successfully!")
+	} else {
+		log.Println("Invalid token")
+		http.Error(w, "Invalid token", http.StatusBadRequest)
 		return
 	}
 }
