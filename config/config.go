@@ -7,8 +7,6 @@ import (
 	"github.com/joho/godotenv"
 )
 
-var jwtSecret = []byte("secret-key")
-
 // Config holds the application configuration
 type Config struct {
 	DBUsername string

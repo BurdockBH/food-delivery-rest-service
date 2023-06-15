@@ -16,11 +16,6 @@ import (
 
 // RegisterUser registers a new user in the database
 func RegisterUser(w http.ResponseWriter, r *http.Request) {
-	if r.Method != http.MethodPost {
-		http.NotFound(w, r)
-		return
-	}
-	// Handler logic goes here
 	var u viewmodels.User
 
 	err := json.NewDecoder(r.Body).Decode(&u)
@@ -51,10 +46,6 @@ func RegisterUser(w http.ResponseWriter, r *http.Request) {
 
 // LoginUser logs in a user
 func LoginUser(w http.ResponseWriter, r *http.Request) {
-	if r.Method != http.MethodPost {
-		http.NotFound(w, r)
-		return
-	}
 	var userLogin viewmodels.UserLogin
 
 	err := json.NewDecoder(r.Body).Decode(&userLogin)
@@ -97,10 +88,6 @@ func LoginUser(w http.ResponseWriter, r *http.Request) {
 }
 
 func DeleteUser(w http.ResponseWriter, r *http.Request) {
-	if r.Method != http.MethodDelete {
-		http.NotFound(w, r)
-		return
-	}
 
 	tokenString := r.Header.Get("Authorization")
 	if tokenString == "" {
