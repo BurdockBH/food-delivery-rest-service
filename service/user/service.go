@@ -105,7 +105,7 @@ func DeleteUser(w http.ResponseWriter, r *http.Request) {
 	tokenString := r.Header.Get("Authorization")
 	if tokenString == "" {
 		log.Println("Token not found")
-		http.Error(w, "Token not found", http.StatusBadRequest)
+		http.Error(w, `{"status" : "Token not found"}`, http.StatusBadRequest)
 		return
 	}
 
@@ -114,7 +114,7 @@ func DeleteUser(w http.ResponseWriter, r *http.Request) {
 	err := godotenv.Load()
 	if err != nil {
 		log.Println("Failed to load .env file:", err)
-		http.Error(w, "Failed to load .env file", http.StatusInternalServerError)
+		http.Error(w, `{"status" : "Failed to load .env file"`, http.StatusInternalServerError)
 		return
 	}
 
@@ -134,13 +134,14 @@ func DeleteUser(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	var u viewmodels.UserLogin
+
 	if _, ok := token.Claims.(jwt.MapClaims); ok && token.Valid {
-		var u viewmodels.UserLogin
 
 		err := json.NewDecoder(r.Body).Decode(&u)
 		if err != nil {
 			log.Println("Failed to decode request body:", err)
-			http.Error(w, "Failed to decode request body", http.StatusBadRequest)
+			http.Error(w, `{"status" : "Failed to decode request body"}`, http.StatusBadRequest)
 			return
 		}
 		defer r.Body.Close()
@@ -148,15 +149,15 @@ func DeleteUser(w http.ResponseWriter, r *http.Request) {
 		err = user.DeleteUser(u)
 		if err != nil {
 			log.Println("Failed to delete user:", err)
-			http.Error(w, fmt.Sprintf("Failed to delete user: %v", err), http.StatusInternalServerError)
+			http.Error(w, fmt.Sprintf(`{"status" : "Failed to delete user: %v"}`, err), http.StatusInternalServerError)
 			return
 		}
 		w.WriteHeader(http.StatusOK)
 		log.Println("User deleted successfully!")
-		fmt.Fprintf(w, "User deleted successfully!")
+		fmt.Fprintf(w, `{"status" : "User deleted successfully!"}`)
 	} else {
 		log.Println("Invalid token")
-		http.Error(w, "Invalid token", http.StatusBadRequest)
+		http.Error(w, fmt.Sprintf(`{"status" : "Invalid token for user %v"}`, u.Email), http.StatusBadRequest)
 		return
 	}
 }
