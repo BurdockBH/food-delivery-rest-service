@@ -3,6 +3,7 @@ package user
 import (
 	"errors"
 	"github.com/BurdockBH/food-delivery-rest-service/db"
+	"github.com/BurdockBH/food-delivery-rest-service/router/helper"
 	"github.com/BurdockBH/food-delivery-rest-service/viewmodels"
 	"golang.org/x/crypto/bcrypt"
 	"log"
@@ -101,6 +102,42 @@ func DeleteUser(u viewmodels.UserLogin) error {
 	if rowsAffected == 0 {
 		log.Printf("No rows affected")
 		return errors.New("no rows affected")
+	}
+
+	return nil
+}
+
+func EditUser(tokenString string, u viewmodels.User) error {
+	// Retrieve user information from the token
+	claims, err := helper.ValidateToken(tokenString)
+	if err != nil {
+		log.Println("Token validation failed:", err)
+		return errors.New("token validation failed")
+	}
+
+	userEMAIL, ok := claims["email"].(string)
+	if !ok {
+		log.Println("User ID is missing or has an invalid type in the token claims")
+		return errors.New("invalid user ID in token claims")
+	}
+
+	hashedPassword, err := hashPassword(u.Password)
+	if err != nil {
+		println("Error hashing password:", err)
+		return err
+	}
+
+	query := "UPDATE users SET name = ?, email = ?, password = ?, phone = ?, updated_at = ? WHERE email = ?"
+	database, err := db.DB.Exec(query, u.Name, u.Email, hashedPassword, u.Phone, time.Now().Unix(), userEMAIL)
+	if err != nil {
+		log.Printf("Failed to update user with email %v. Error: %v\n", claims["email"].(string), err)
+		return err
+	}
+
+	_, err = database.RowsAffected()
+	if err != nil {
+		log.Printf("Error with rows affected: %v\n", err)
+		return err
 	}
 
 	return nil

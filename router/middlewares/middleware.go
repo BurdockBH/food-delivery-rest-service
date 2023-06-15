@@ -35,7 +35,7 @@ func Delete(next http.HandlerFunc) http.HandlerFunc {
 
 func Put(next http.HandlerFunc) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		if r.Method != http.MethodPost && r.Method != http.MethodOptions {
+		if r.Method != http.MethodPut && r.Method != http.MethodOptions {
 			http.Error(w, http.StatusText(http.StatusMethodNotAllowed), http.StatusMethodNotAllowed)
 			return
 		}

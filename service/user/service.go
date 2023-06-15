@@ -129,3 +129,48 @@ func DeleteUser(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 }
+
+func EditUser(w http.ResponseWriter, r *http.Request) {
+	tokenString := r.Header.Get("Authorization")
+	if tokenString == "" {
+		log.Println("Token not found")
+		http.Error(w, `{"status" : "Token not found"}`, http.StatusBadRequest)
+		return
+	}
+
+	tokenString = strings.Replace(tokenString, "Bearer ", "", 1)
+
+	claims, err := helper.ValidateToken(tokenString)
+	if err != nil {
+		log.Println("Token validation failed:", err)
+		http.Error(w, fmt.Sprintf(`{"status" : "Token validation failed: %v"}`, err), http.StatusInternalServerError)
+		return
+	}
+
+	var u viewmodels.User
+
+	if _, ok := claims["email"]; ok {
+		err := json.NewDecoder(r.Body).Decode(&u)
+		if err != nil {
+			log.Println("Failed to decode request body:", err)
+			http.Error(w, `{"status" : "Failed to decode request body"}`, http.StatusBadRequest)
+			return
+		}
+		defer r.Body.Close()
+
+		err = user.EditUser(tokenString, u)
+		if err != nil {
+			log.Println("Failed to update user:", err)
+			http.Error(w, fmt.Sprintf(`{"status" : "Failed to update user: %v"}`, err), http.StatusInternalServerError)
+			return
+		}
+
+		w.WriteHeader(http.StatusOK)
+		log.Println("User updated successfully!")
+		fmt.Fprintf(w, `{"status" : "User updated successfully!"}`)
+	} else {
+		log.Println("Invalid token")
+		http.Error(w, fmt.Sprintf(`{"status" : "Invalid token for user %v"}`, u.Email), http.StatusBadRequest)
+		return
+	}
+}
