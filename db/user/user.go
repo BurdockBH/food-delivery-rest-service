@@ -9,6 +9,7 @@ import (
 	"time"
 )
 
+// RegisterUser registers a new user
 func RegisterUser(u viewmodels.User) error {
 	existingUserQuery := "SELECT COUNT(*) FROM users WHERE email = ?"
 	var count int
@@ -50,8 +51,8 @@ func RegisterUser(u viewmodels.User) error {
 	return nil
 }
 
+// Function for password hashing using bcrypt
 func hashPassword(password string) (string, error) {
-	// Generate a hash of the password
 	hash, err := bcrypt.GenerateFromPassword([]byte(password), bcrypt.DefaultCost)
 	if err != nil {
 		return "", err

@@ -14,6 +14,7 @@ type User struct {
 	UpdatedAt int64  `json:"updated_at"`
 }
 
+// Validate validates the user
 func (u *User) Validate() (bool, string) {
 	if regexp.MustCompile(`^[a-zA-Z0-9._%+\-]+@[a-zA-Z0-9.\-]+\.[a-zA-Z]{2,}$`).MatchString(u.Email) == false {
 		return false, "Invalid email"

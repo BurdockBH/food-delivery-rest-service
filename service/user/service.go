@@ -9,6 +9,7 @@ import (
 	"net/http"
 )
 
+// RegisterUser registers a new user in the database
 func RegisterUser(w http.ResponseWriter, r *http.Request) {
 	if r.Method != http.MethodPost {
 		http.NotFound(w, r)
