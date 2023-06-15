@@ -28,7 +28,7 @@ func (u *User) Validate() (bool, string) {
 		return false, "Invalid name"
 	} else if regexp.MustCompile(`^[0-9]+$`).MatchString(u.Phone) == false {
 		return false, "Invalid phone"
-	} else if regexp.MustCompile(`^[a-zA-Z0-9]+$`).MatchString(u.Password) == false {
+	} else if regexp.MustCompile(`^(?=.*[a-zA-Z0-9!@#$%^&*()-_=+{};:,<.>]).{8,20}$`).MatchString(u.Password) == false {
 		return false, "Invalid password"
 	}
 	return true, ""
@@ -37,7 +37,7 @@ func (u *User) Validate() (bool, string) {
 func (u *UserLogin) ValidateLogin() (bool, string) {
 	if regexp.MustCompile(`^[a-zA-Z0-9._%+\-]+@[a-zA-Z0-9.\-]+\.[a-zA-Z]{2,}$`).MatchString(u.Email) == false {
 		return false, "Invalid email"
-	} else if regexp.MustCompile(`^[a-zA-Z0-9]+$`).MatchString(u.Password) == false {
+	} else if regexp.MustCompile(`^(?=.*[a-zA-Z0-9!@#$%^&*()-_=+{};:,<.>]).{8,20}$`).MatchString(u.Password) == false {
 		return false, "Invalid password"
 	}
 	return true, ""
