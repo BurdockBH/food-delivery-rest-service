@@ -14,6 +14,12 @@ type User struct {
 	UpdatedAt int64  `json:"updated_at"`
 }
 
+type UserLogin struct {
+	ID       int64  `json:"id"`
+	Email    string `json:"email"`
+	Password string `json:"password"`
+}
+
 // Validate validates the user
 func (u *User) Validate() (bool, string) {
 	if regexp.MustCompile(`^[a-zA-Z0-9._%+\-]+@[a-zA-Z0-9.\-]+\.[a-zA-Z]{2,}$`).MatchString(u.Email) == false {
@@ -22,7 +28,16 @@ func (u *User) Validate() (bool, string) {
 		return false, "Invalid name"
 	} else if regexp.MustCompile(`^[0-9]+$`).MatchString(u.Phone) == false {
 		return false, "Invalid phone"
-	} else if regexp.MustCompile(`^[a-zA-Z0-9]+$`).MatchString(u.Password) == false {
+	} else if len(u.Password) > 20 || len(u.Password) < 8 {
+		return false, "Invalid password"
+	}
+	return true, ""
+}
+
+func (u *UserLogin) ValidateLogin() (bool, string) {
+	if regexp.MustCompile(`^[a-zA-Z0-9._%+\-]+@[a-zA-Z0-9.\-]+\.[a-zA-Z]{2,}$`).MatchString(u.Email) == false {
+		return false, "Invalid email"
+	} else if len(u.Password) > 20 || len(u.Password) < 8 {
 		return false, "Invalid password"
 	}
 	return true, ""
