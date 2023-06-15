@@ -1,6 +1,10 @@
 package viewmodels
 
+type Response struct {
+	Status string `json:"status"`
+}
+
 type LoginResponse struct {
-	Status      string `json:"status"`
-	AccessToken string `json:"access_token"`
+	Response
+	AccessToken string `json:"token"`
 }

@@ -77,7 +77,7 @@ func LoginUser(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	jsonResponse, err := json.Marshal(viewmodels.LoginResponse{AccessToken: token, Status: "success"})
+	jsonResponse, err := json.Marshal(viewmodels.LoginResponse{AccessToken: token, Response: viewmodels.Response{Status: "User logged in successfully!"}})
 	if err != nil {
 		log.Println("Failed to marshal json:", err)
 		http.Error(w, fmt.Sprintf("Failed to marshal json: %v", err), http.StatusInternalServerError)
