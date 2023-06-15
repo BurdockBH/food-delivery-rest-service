@@ -51,6 +51,24 @@ func RegisterUser(u viewmodels.User) error {
 	return nil
 }
 
+func LoginUser(u viewmodels.UserLogin) error {
+	query := "SELECT id, password FROM users WHERE email = ?"
+	var id int
+	var password string
+	err := db.DB.QueryRow(query, u.Email).Scan(&id, &password)
+	if err != nil {
+		log.Println("User does not exist:", err)
+		return errors.New("user does not exist")
+	}
+
+	err = bcrypt.CompareHashAndPassword([]byte(password), []byte(u.Password))
+	if err != nil {
+		log.Println("Error comparing password:", err)
+		return errors.New("error comparing password")
+	}
+	return nil
+}
+
 // Function for password hashing using bcrypt
 func hashPassword(password string) (string, error) {
 	hash, err := bcrypt.GenerateFromPassword([]byte(password), bcrypt.DefaultCost)
