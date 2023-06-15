@@ -48,6 +48,7 @@ func RegisterUser(w http.ResponseWriter, r *http.Request) {
 	fmt.Fprintf(w, "User registered successfully!")
 }
 
+// LoginUser logs in a user
 func LoginUser(w http.ResponseWriter, r *http.Request) {
 	if r.Method != http.MethodPost {
 		http.NotFound(w, r)
@@ -76,9 +77,22 @@ func LoginUser(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	jsonResponse, err := json.Marshal(viewmodels.LoginResponse{AccessToken: token, Status: "success"})
+	if err != nil {
+		log.Println("Failed to marshal json:", err)
+		http.Error(w, fmt.Sprintf("Failed to marshal json: %v", err), http.StatusInternalServerError)
+		return
+	}
+
+	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusOK)
 	log.Println("User logged in successfully!")
-	fmt.Fprintf(w, "User logged in successfully! Token: %v", token)
+	_, err = w.Write(jsonResponse)
+	if err != nil {
+		log.Println("Failed to write response:", err)
+		http.Error(w, fmt.Sprintf("Failed to write response: %v", err), http.StatusInternalServerError)
+		return
+	}
 }
 
 // GenerateToken Token generation when user logs in
