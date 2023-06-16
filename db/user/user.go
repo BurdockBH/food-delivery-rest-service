@@ -27,7 +27,7 @@ func RegisterUser(u viewmodels.User) error {
 		return errors.New("user with that email already exists")
 	}
 
-	hashedPassword, err := hashPassword(u.Password)
+	hashedPassword, err := helper.HashPassword(u.Password)
 	if err != nil {
 		println("Error hashing password:", err)
 		return err
@@ -55,7 +55,34 @@ func RegisterUser(u viewmodels.User) error {
 }
 
 // LoginUser logs in a user, it checks if the user exists and if the password matches
-func LoginUser(u viewmodels.UserLogin) error {
+func LoginUser(u viewmodels.UserLoginRequest) error {
+	//query := "CALL LoginUser(?, ?)"
+	//st, err := db.DB.Prepare(query)
+	//if err != nil {
+	//	log.Println(`Error preparing query "CALL LoginUser(?, ?)"`, err)
+	//	return err
+	//}
+	//defer st.Close()
+	//
+	//hashedPassword, err := helper.HashPassword(u.Password)
+	//
+	//result, err := db.DB.Exec(query, u.Email, hashedPassword)
+	//if err != nil {
+	//	log.Println(`Error executing query "CALL LoginUser(?, ?)"`, err)
+	//	return err
+	//}
+	//
+	//rowsAffected, err := result.RowsAffected()
+	//if err != nil {
+	//	println("Error getting rows affected:", err)
+	//	return err
+	//}
+	//
+	//if rowsAffected == 0 {
+	//	log.Println("Entered wrong email or password")
+	//	return errors.New("entered wrong email or password")
+	//}
+
 	query := "SELECT id, password FROM users WHERE email = ?"
 	var id int
 	var password string
@@ -71,10 +98,12 @@ func LoginUser(u viewmodels.UserLogin) error {
 		return errors.New("error comparing password")
 	}
 	return nil
+
+	return nil
 }
 
 // DeleteUser deletes a user from the database
-func DeleteUser(u viewmodels.UserLogin) error {
+func DeleteUser(u viewmodels.UserLoginRequest) error {
 	query := "SELECT id, password FROM users WHERE email = ?"
 	var id int
 	var password string
@@ -84,7 +113,7 @@ func DeleteUser(u viewmodels.UserLogin) error {
 		return errors.New("user does not exist")
 	}
 
-	err = bcrypt.CompareHashAndPassword([]byte(password), []byte(u.Password))
+	err = helper.CompareHashedPassword(password, u.Password)
 	if err != nil {
 		log.Println("Error comparing password:", err)
 		return errors.New("error comparing password")
@@ -93,7 +122,7 @@ func DeleteUser(u viewmodels.UserLogin) error {
 	query = "DELETE FROM users WHERE email = ?"
 	database, err := db.DB.Exec(query, u.Email)
 	if err != nil {
-		log.Printf("Failed to create user with email %v. error is %v \n ", u.Email, err)
+		log.Printf("Failed to delete user with email %v. error is %v \n ", u.Email, err)
 		return err
 	}
 
@@ -120,20 +149,22 @@ func EditUser(tokenString string, u viewmodels.User) error {
 		return errors.New("token validation failed")
 	}
 
-	userEMAIL, ok := claims["email"].(string)
-	if !ok {
-		log.Println("User ID is missing or has an invalid type in the token claims")
-		return errors.New("invalid user ID in token claims")
-	}
-
-	hashedPassword, err := hashPassword(u.Password)
+	hashedPassword, err := helper.HashPassword(u.Password)
 	if err != nil {
 		println("Error hashing password:", err)
 		return err
 	}
 
-	query := "UPDATE users SET name = ?, email = ?, password = ?, phone = ?, updated_at = ? WHERE email = ?"
-	database, err := db.DB.Exec(query, u.Name, u.Email, hashedPassword, u.Phone, time.Now().Unix(), userEMAIL)
+	idQuery := "SELECT id FROM users WHERE email = ?"
+	var id int
+	err = db.DB.QueryRow(idQuery, u.Email).Scan(&id)
+	if err != nil {
+		log.Println("Error getting user id:", err)
+		return errors.New("error getting user id")
+	}
+
+	query := "UPDATE users SET name = ?, email = ?, password = ?, phone = ?, updated_at = ? WHERE id = ?"
+	database, err := db.DB.Exec(query, u.Name, u.Email, hashedPassword, u.Phone, time.Now().Unix(), id)
 	if err != nil {
 		log.Printf("Failed to update user with email %v. Error: %v\n", claims["email"].(string), err)
 		return err
@@ -146,13 +177,4 @@ func EditUser(tokenString string, u viewmodels.User) error {
 	}
 
 	return nil
-}
-
-// Function for password hashing using bcrypt
-func hashPassword(password string) (string, error) {
-	hash, err := bcrypt.GenerateFromPassword([]byte(password), bcrypt.DefaultCost)
-	if err != nil {
-		return "", err
-	}
-	return string(hash), nil
 }

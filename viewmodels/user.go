@@ -15,8 +15,7 @@ type User struct {
 	UpdatedAt int64  `json:"updated_at"`
 }
 
-// UserLogin is the user login model
-type UserLogin struct {
+type UserLoginRequest struct {
 	ID       int64  `json:"id"`
 	Email    string `json:"email"`
 	Password string `json:"password"`
@@ -37,7 +36,7 @@ func (u *User) Validate() (bool, string) {
 }
 
 // ValidateLogin validates the user login credentials
-func (u *UserLogin) ValidateLogin() (bool, string) {
+func (u *UserLoginRequest) ValidateLogin() (bool, string) {
 	if regexp.MustCompile(`^[a-zA-Z0-9._%+\-]+@[a-zA-Z0-9.\-]+\.[a-zA-Z]{2,}$`).MatchString(u.Email) == false {
 		return false, "Invalid email"
 	} else if len(u.Password) > 20 || len(u.Password) < 8 {

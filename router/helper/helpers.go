@@ -2,21 +2,20 @@ package helper
 
 import (
 	"fmt"
+	"github.com/BurdockBH/food-delivery-rest-service/config"
 	"github.com/golang-jwt/jwt/v5"
-	"github.com/joho/godotenv"
-	"os"
+	"golang.org/x/crypto/bcrypt"
 	"time"
 )
 
 // ValidateToken validates the token
 func ValidateToken(tokenString string) (jwt.MapClaims, error) {
-	err := godotenv.Load()
-	if err != nil {
-		return nil, fmt.Errorf("failed to load .env file: %v", err)
-	}
 
-	// Retrieve the JWT secret key from the environment variable
-	jwtSecret := []byte(os.Getenv("JWT_SECRET"))
+	jwtSecret, err := config.LoadJWTConfig()
+	if err != nil {
+		println("Failed to load JWT config:", err)
+		return nil, err
+	}
 
 	token, err := jwt.Parse(tokenString, func(token *jwt.Token) (interface{}, error) {
 		if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
@@ -40,11 +39,11 @@ func ValidateToken(tokenString string) (jwt.MapClaims, error) {
 func GenerateToken(email string) (string, error) {
 	token := jwt.New(jwt.SigningMethodHS256)
 
-	err := godotenv.Load()
+	jwtSecret, err := config.LoadJWTConfig()
 	if err != nil {
-		return "Failed to load .env", err
+		println("Failed to load JWT config:", err)
+		return "Failed to load JWT config:", err
 	}
-	jwtSecret := []byte(os.Getenv("JWT_SECRET"))
 
 	claims := token.Claims.(jwt.MapClaims)
 	claims["email"] = email
@@ -57,4 +56,17 @@ func GenerateToken(email string) (string, error) {
 	}
 
 	return tokenString, nil
+}
+
+// HashPassword hashes the password
+func HashPassword(password string) (string, error) {
+	hash, err := bcrypt.GenerateFromPassword([]byte(password), bcrypt.DefaultCost)
+	if err != nil {
+		return "", err
+	}
+	return string(hash), nil
+}
+
+func CompareHashedPassword(hashedPassword string, password string) error {
+	return bcrypt.CompareHashAndPassword([]byte(hashedPassword), []byte(password))
 }
