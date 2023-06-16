@@ -8,6 +8,7 @@ import (
 	"time"
 )
 
+// ValidateToken validates the token
 func ValidateToken(tokenString string) (jwt.MapClaims, error) {
 	err := godotenv.Load()
 	if err != nil {
@@ -35,6 +36,7 @@ func ValidateToken(tokenString string) (jwt.MapClaims, error) {
 	return claims, nil
 }
 
+// GenerateToken generates a JWT token
 func GenerateToken(email string) (string, error) {
 	token := jwt.New(jwt.SigningMethodHS256)
 

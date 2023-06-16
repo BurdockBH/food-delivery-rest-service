@@ -10,6 +10,8 @@ import (
 	"time"
 )
 
+// Database queries and logic for user
+
 // RegisterUser registers a new user
 func RegisterUser(u viewmodels.User) error {
 	existingUserQuery := "SELECT COUNT(*) FROM users WHERE email = ?"
@@ -52,6 +54,7 @@ func RegisterUser(u viewmodels.User) error {
 	return nil
 }
 
+// LoginUser logs in a user, it checks if the user exists and if the password matches
 func LoginUser(u viewmodels.UserLogin) error {
 	query := "SELECT id, password FROM users WHERE email = ?"
 	var id int
@@ -70,6 +73,7 @@ func LoginUser(u viewmodels.UserLogin) error {
 	return nil
 }
 
+// DeleteUser deletes a user from the database
 func DeleteUser(u viewmodels.UserLogin) error {
 	query := "SELECT id, password FROM users WHERE email = ?"
 	var id int
@@ -107,6 +111,7 @@ func DeleteUser(u viewmodels.UserLogin) error {
 	return nil
 }
 
+// EditUser edits a user's information
 func EditUser(tokenString string, u viewmodels.User) error {
 	// Retrieve user information from the token
 	claims, err := helper.ValidateToken(tokenString)

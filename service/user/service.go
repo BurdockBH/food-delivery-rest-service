@@ -25,7 +25,7 @@ func RegisterUser(w http.ResponseWriter, r *http.Request) {
 	validRequest, errString := u.Validate()
 	if !validRequest {
 		log.Println(errString)
-		http.Error(w, errString, http.StatusBadRequest)
+		http.Error(w, fmt.Sprintf(`{"status" : "%v"}`, errString), http.StatusBadRequest)
 		return
 	}
 
@@ -51,6 +51,13 @@ func LoginUser(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, `{"status" : "Failed to decode request body"}`, http.StatusBadRequest)
 	}
 	defer r.Body.Close()
+
+	validRequest, errString := userLogin.ValidateLogin()
+	if !validRequest {
+		log.Println(errString)
+		http.Error(w, fmt.Sprintf(`{"status" : "%v"}`, errString), http.StatusBadRequest)
+		return
+	}
 
 	err = user.LoginUser(userLogin)
 	if err != nil {
@@ -84,6 +91,7 @@ func LoginUser(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
+// DeleteUser deletes a user from the database
 func DeleteUser(w http.ResponseWriter, r *http.Request) {
 	tokenString := r.Header.Get("Authorization")
 	if tokenString == "" {
@@ -101,11 +109,18 @@ func DeleteUser(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	var u viewmodels.UserLogin
+	var userLogin viewmodels.UserLogin
+
+	validRequest, errString := userLogin.ValidateLogin()
+	if !validRequest {
+		log.Println(errString)
+		http.Error(w, fmt.Sprintf(`{"status" : "%v"}`, errString), http.StatusBadRequest)
+		return
+	}
 
 	if _, ok := claims["email"]; ok {
 
-		err := json.NewDecoder(r.Body).Decode(&u)
+		err := json.NewDecoder(r.Body).Decode(&userLogin)
 		if err != nil {
 			log.Println("Failed to decode request body:", err)
 			http.Error(w, `{"status" : "Failed to decode request body"}`, http.StatusBadRequest)
@@ -113,7 +128,7 @@ func DeleteUser(w http.ResponseWriter, r *http.Request) {
 		}
 		defer r.Body.Close()
 
-		err = user.DeleteUser(u)
+		err = user.DeleteUser(userLogin)
 		if err != nil {
 			log.Println("Failed to delete user:", err)
 			http.Error(w, fmt.Sprintf(`{"status" : "Failed to delete user: %v"}`, err), http.StatusInternalServerError)
@@ -125,11 +140,12 @@ func DeleteUser(w http.ResponseWriter, r *http.Request) {
 		fmt.Fprintf(w, `{"status" : "User deleted successfully!"}`)
 	} else {
 		log.Println("Invalid token")
-		http.Error(w, fmt.Sprintf(`{"status" : "Invalid token for user %v"}`, u.Email), http.StatusBadRequest)
+		http.Error(w, fmt.Sprintf(`{"status" : "Invalid token for user %v"}`, userLogin.Email), http.StatusBadRequest)
 		return
 	}
 }
 
+// EditUser edits a user in the database
 func EditUser(w http.ResponseWriter, r *http.Request) {
 	tokenString := r.Header.Get("Authorization")
 	if tokenString == "" {
@@ -148,6 +164,13 @@ func EditUser(w http.ResponseWriter, r *http.Request) {
 	}
 
 	var u viewmodels.User
+
+	validRequest, errString := u.Validate()
+	if !validRequest {
+		log.Println(errString)
+		http.Error(w, fmt.Sprintf(`{"status" : "%v"}`, errString), http.StatusBadRequest)
+		return
+	}
 
 	if _, ok := claims["email"]; ok {
 		err := json.NewDecoder(r.Body).Decode(&u)

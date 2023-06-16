@@ -4,6 +4,7 @@ import (
 	"regexp"
 )
 
+// User is the user model
 type User struct {
 	ID        int64  `json:"id"`
 	Name      string `json:"name"`
@@ -14,6 +15,7 @@ type User struct {
 	UpdatedAt int64  `json:"updated_at"`
 }
 
+// UserLogin is the user login model
 type UserLogin struct {
 	ID       int64  `json:"id"`
 	Email    string `json:"email"`
@@ -34,6 +36,7 @@ func (u *User) Validate() (bool, string) {
 	return true, ""
 }
 
+// ValidateLogin validates the user login credentials
 func (u *UserLogin) ValidateLogin() (bool, string) {
 	if regexp.MustCompile(`^[a-zA-Z0-9._%+\-]+@[a-zA-Z0-9.\-]+\.[a-zA-Z]{2,}$`).MatchString(u.Email) == false {
 		return false, "Invalid email"

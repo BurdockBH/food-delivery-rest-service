@@ -6,10 +6,11 @@ import (
 	"net/http"
 )
 
+// InitializeRouter initializes the router
 func InitializeRouter() *http.ServeMux {
 	router := http.NewServeMux()
 
-	//TODO: Add more routes here
+	// User routes
 	router.HandleFunc("/user/register", middlewares.Chain(middlewares.Post)(user.RegisterUser))
 	router.HandleFunc("/user/login", middlewares.Chain(middlewares.Post)(user.LoginUser))
 	router.HandleFunc("/user/delete-user", middlewares.Chain(middlewares.Delete)(user.DeleteUser))
