@@ -10,11 +10,8 @@ CREATE DEFINER=`root`@`localhost` PROCEDURE `RegisterUser`(
     IN inUpdatedAt bigint
 )
 BEGIN
-    DECLARE existingCount INT;
 
-    SELECT COUNT(*) INTO existingCount FROM users WHERE email = inEmail;
-
-    IF existingCount > 0 THEN
+    IF (SELECT COUNT(*) FROM users WHERE email = inEmail) > 0 THEN
         SELECT 0;
     ELSE
         INSERT INTO users (name, email, password, phone, created_at, updated_at)

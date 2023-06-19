@@ -34,7 +34,6 @@ func Connect(cfg *config.DatabaseConfig) (*sql.DB, error) {
 }
 
 func ValidateDbConfig(cfg *config.DatabaseConfig) error {
-	// Write validation logic here
 	if cfg.DBUsername == "" {
 		return fmt.Errorf("db username is required")
 	}

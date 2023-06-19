@@ -16,7 +16,7 @@ func main() {
 		log.Fatal("cannot load config:", err)
 	}
 
-	dbConnected, err := db.Connect(cfg)
+	dbConnected, err := db.Connect(cfg.DatabaseConfig)
 	if err != nil {
 		log.Fatal("cannot connect to db:", err)
 	}

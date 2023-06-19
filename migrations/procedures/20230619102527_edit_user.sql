@@ -9,11 +9,13 @@ CREATE DEFINER=`root`@`localhost` PROCEDURE `EditUser`(
     IN inUpdatedAt bigint
 )
 BEGIN
-    IF EXISTS (SELECT id FROM users WHERE email = email) THEN
-        UPDATE users SET name = inName, email = inEmail, password = inHashedPassword, phone = inPhone, updated_at = inUpdatedAt WHERE email = email;
-        SELECT 'UPDATED';
+    DECLARE userId INT;
+    SELECT id INTO userId FROM users WHERE email = inEmail;
+    IF userId IS NOT NULL THEN
+        UPDATE users SET name = inName, password = inHashedPassword, phone = inPhone, updated_at = inUpdatedAt WHERE id = userID AND email = inEmail;
+        SELECT 1;
+    ELSE SELECT 0;
     END IF;
-
 END //
 DELIMITER ;
 -- +goose StatementEnd

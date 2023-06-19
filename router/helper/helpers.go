@@ -11,11 +11,7 @@ import (
 // ValidateToken validates the token
 func ValidateToken(tokenString string) (jwt.MapClaims, error) {
 
-	jwtSecret, err := config.LoadJWTConfig()
-	if err != nil {
-		println("Failed to load JWT config:", err)
-		return nil, err
-	}
+	jwtSecret := []byte(config.CFG.JWTConfig.JWTSecret)
 
 	token, err := jwt.Parse(tokenString, func(token *jwt.Token) (interface{}, error) {
 		if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
@@ -39,13 +35,7 @@ func ValidateToken(tokenString string) (jwt.MapClaims, error) {
 func GenerateToken(email string) (string, error) {
 	token := jwt.New(jwt.SigningMethodHS256)
 
-	jwtConfig, err := config.LoadJWTConfig()
-	if err != nil {
-		println("Failed to load JWT config:", err)
-		return "", err
-	}
-
-	jwtSecret := []byte(jwtConfig.JWTSecret)
+	jwtSecret := []byte(config.CFG.JWTConfig.JWTSecret)
 
 	claims := token.Claims.(jwt.MapClaims)
 	claims["email"] = email

@@ -129,23 +129,25 @@ func EditUser(tokenString string, u viewmodels.User) error {
 	st, err := db.DB.Prepare(query)
 	if err != nil {
 		log.Println(`Error preparing query "CALL EditUser"`, err)
+		return err
 	}
 
-	database, err := st.Exec(u.Name, u.Email, u.Password, u.Phone, time.Now().Unix())
+	hashedPassword, err := helper.HashPassword(u.Password)
+	if err != nil {
+		log.Println("Failed to hash password", err)
+		return err
+	}
+
+	var updated int
+	err = st.QueryRow(u.Name, u.Email, hashedPassword, u.Phone, time.Now().Unix()).Scan(&updated)
 	if err != nil {
 		log.Printf("Failed to update user with email %v. Error: %v\n\n\n", claims["email"].(string), err)
 		return err
 	}
 
-	rowsAffected, err := database.RowsAffected()
-	if err != nil {
-		log.Printf("Error with rows affected: %v\n", err)
-		return err
-	}
-
-	if rowsAffected == 0 {
-		log.Printf("No rows affected")
-		return errors.New("no rows affected")
+	if updated == 0 {
+		log.Printf("User with that email does not exist")
+		return errors.New("user with that email does not exist")
 	}
 
 	return nil
