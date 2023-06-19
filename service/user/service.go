@@ -22,10 +22,10 @@ func RegisterUser(w http.ResponseWriter, r *http.Request) {
 	}
 	defer r.Body.Close()
 
-	validRequest, errString := u.Validate()
-	if !validRequest {
-		log.Println(errString)
-		http.Error(w, fmt.Sprintf(`{"status" : "%v"}`, errString), http.StatusBadRequest)
+	err = u.Validate()
+	if err != nil {
+		log.Println("Failed to validate login:", err)
+		http.Error(w, fmt.Sprintf(`{"status" : "Failed to validate login: %v"}`, err), http.StatusBadRequest)
 		return
 	}
 
@@ -52,10 +52,10 @@ func LoginUser(w http.ResponseWriter, r *http.Request) {
 	}
 	defer r.Body.Close()
 
-	validRequest, errString := userLogin.ValidateLogin()
-	if !validRequest {
-		log.Println(errString)
-		http.Error(w, fmt.Sprintf(`{"status" : "%v"}`, errString), http.StatusBadRequest)
+	err = userLogin.ValidateLogin()
+	if err != nil {
+		log.Println("Failed to validate login:", err)
+		http.Error(w, fmt.Sprintf(`{"status" : "Failed to validate login: %v"}`, err), http.StatusBadRequest)
 		return
 	}
 
@@ -111,10 +111,10 @@ func DeleteUser(w http.ResponseWriter, r *http.Request) {
 
 	var userLogin viewmodels.UserLoginRequest
 
-	validRequest, errString := userLogin.ValidateLogin()
-	if !validRequest {
-		log.Println(errString)
-		http.Error(w, fmt.Sprintf(`{"status" : "%v"}`, errString), http.StatusBadRequest)
+	err = userLogin.ValidateLogin()
+	if err != nil {
+		log.Println("Failed to validate login:", err)
+		http.Error(w, fmt.Sprintf(`{"status" : "Failed to validate login: %v"}`, err), http.StatusBadRequest)
 		return
 	}
 
@@ -179,10 +179,10 @@ func EditUser(w http.ResponseWriter, r *http.Request) {
 	}
 	defer r.Body.Close()
 
-	validRequest, errString := u.Validate()
-	if !validRequest {
-		log.Println(errString)
-		http.Error(w, fmt.Sprintf(`{"status" : "%v"}`, errString), http.StatusBadRequest)
+	err = u.Validate()
+	if err != nil {
+		log.Println("Failed to validate login:", err)
+		http.Error(w, fmt.Sprintf(`{"status" : "Failed to validate login: %v"}`, err), http.StatusBadRequest)
 		return
 	}
 
