@@ -22,10 +22,10 @@ func RegisterUser(w http.ResponseWriter, r *http.Request) {
 	}
 	defer r.Body.Close()
 
-	validRequest, errString := u.Validate()
-	if !validRequest {
-		log.Println(errString)
-		http.Error(w, errString, http.StatusBadRequest)
+	err = u.Validate()
+	if err != nil {
+		log.Println("Failed to validate login:", err)
+		http.Error(w, fmt.Sprintf(`{"status" : "Failed to validate login: %v"}`, err), http.StatusBadRequest)
 		return
 	}
 
@@ -43,7 +43,7 @@ func RegisterUser(w http.ResponseWriter, r *http.Request) {
 
 // LoginUser logs in a user
 func LoginUser(w http.ResponseWriter, r *http.Request) {
-	var userLogin viewmodels.UserLogin
+	var userLogin viewmodels.UserLoginRequest
 
 	err := json.NewDecoder(r.Body).Decode(&userLogin)
 	if err != nil {
@@ -51,6 +51,13 @@ func LoginUser(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, `{"status" : "Failed to decode request body"}`, http.StatusBadRequest)
 	}
 	defer r.Body.Close()
+
+	err = userLogin.ValidateLogin()
+	if err != nil {
+		log.Println("Failed to validate login:", err)
+		http.Error(w, fmt.Sprintf(`{"status" : "Failed to validate login: %v"}`, err), http.StatusBadRequest)
+		return
+	}
 
 	err = user.LoginUser(userLogin)
 	if err != nil {
@@ -84,6 +91,7 @@ func LoginUser(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
+// DeleteUser deletes a user from the database
 func DeleteUser(w http.ResponseWriter, r *http.Request) {
 	tokenString := r.Header.Get("Authorization")
 	if tokenString == "" {
@@ -101,31 +109,111 @@ func DeleteUser(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	var u viewmodels.UserLogin
+	var userLogin viewmodels.UserLoginRequest
 
-	if _, ok := claims["email"]; ok {
+	err = userLogin.ValidateLogin()
+	if err != nil {
+		log.Println("Failed to validate login:", err)
+		http.Error(w, fmt.Sprintf(`{"status" : "Failed to validate login: %v"}`, err), http.StatusBadRequest)
+		return
+	}
 
-		err := json.NewDecoder(r.Body).Decode(&u)
-		if err != nil {
-			log.Println("Failed to decode request body:", err)
-			http.Error(w, `{"status" : "Failed to decode request body"}`, http.StatusBadRequest)
-			return
-		}
-		defer r.Body.Close()
+	if _, ok := claims["email"]; !ok {
+		log.Println("Invalid claim")
+		http.Error(w, fmt.Sprintf(`{"status" : "Invalid token for user %v"}`, userLogin.Email), http.StatusBadRequest)
+		return
+	}
 
-		err = user.DeleteUser(u)
-		if err != nil {
-			log.Println("Failed to delete user:", err)
-			http.Error(w, fmt.Sprintf(`{"status" : "Failed to delete user: %v"}`, err), http.StatusInternalServerError)
-			return
-		}
+	err = json.NewDecoder(r.Body).Decode(&userLogin)
+	if err != nil {
+		log.Println("Failed to decode request body:", err)
+		http.Error(w, `{"status" : "Failed to decode request body"}`, http.StatusBadRequest)
+		return
+	}
+	defer r.Body.Close()
 
-		w.WriteHeader(http.StatusOK)
-		log.Println("User deleted successfully!")
-		fmt.Fprintf(w, `{"status" : "User deleted successfully!"}`)
-	} else {
-		log.Println("Invalid token")
-		http.Error(w, fmt.Sprintf(`{"status" : "Invalid token for user %v"}`, u.Email), http.StatusBadRequest)
+	err = user.DeleteUser(userLogin)
+	if err != nil {
+		log.Println("Failed to delete user:", err)
+		http.Error(w, fmt.Sprintf(`{"status" : "Failed to delete user: %v"}`, err), http.StatusInternalServerError)
+		return
+	}
+
+	w.WriteHeader(http.StatusOK)
+	log.Println("User deleted successfully!")
+	fmt.Fprintf(w, `{"status" : "User deleted successfully!"}`)
+
+}
+
+// EditUser edits a user in the database
+func EditUser(w http.ResponseWriter, r *http.Request) {
+	tokenString := r.Header.Get("Authorization")
+	if tokenString == "" {
+		log.Println("Token not found")
+		http.Error(w, `{"status" : "Token not found"}`, http.StatusBadRequest)
+		return
+	}
+
+	tokenString = strings.Replace(tokenString, "Bearer ", "", 1)
+
+	claims, err := helper.ValidateToken(tokenString)
+	if err != nil {
+		log.Println("Token validation failed:", err)
+		http.Error(w, fmt.Sprintf(`{"status" : "Token validation failed: %v"}`, err), http.StatusInternalServerError)
+		return
+	}
+
+	var u viewmodels.User
+
+	if _, ok := claims["email"]; !ok {
+		log.Println("Invalid claim")
+		http.Error(w, fmt.Sprintf(`{"status" : "Invalid claim for user %v"}`, u.Email), http.StatusBadRequest)
+		return
+	}
+
+	err = json.NewDecoder(r.Body).Decode(&u)
+	if err != nil {
+		log.Println("Failed to decode request body:", err)
+		http.Error(w, `{"status" : "Failed to decode request body"}`, http.StatusBadRequest)
+		return
+	}
+	defer r.Body.Close()
+
+	err = u.Validate()
+	if err != nil {
+		log.Println("Failed to validate login:", err)
+		http.Error(w, fmt.Sprintf(`{"status" : "Failed to validate login: %v"}`, err), http.StatusBadRequest)
+		return
+	}
+
+	err = user.EditUser(tokenString, u)
+	if err != nil {
+		log.Println("Failed to update user:", err)
+		http.Error(w, fmt.Sprintf(`{"status" : "Failed to update user: %v"}`, err), http.StatusInternalServerError)
+		return
+	}
+
+	token, err := helper.GenerateToken(u.Email)
+	if err != nil {
+		log.Println("Failed to generate token:", err)
+		http.Error(w, fmt.Sprintf(`"status" : "Failed to generate token: %v"}`, err), http.StatusInternalServerError)
+		return
+	}
+
+	jsonResponse, err := json.Marshal(viewmodels.LoginResponse{AccessToken: token, Response: viewmodels.Response{Status: fmt.Sprintf("User %v updated successfully!", u.Email)}})
+	if err != nil {
+		log.Println("Failed to marshal json:", err)
+		http.Error(w, fmt.Sprintf(`{"stauts" : "Failed to marshal json: %v"}`, err), http.StatusInternalServerError)
+		return
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(http.StatusOK)
+	log.Println("User updated successfully!")
+	_, err = w.Write(jsonResponse)
+	if err != nil {
+		log.Println("Failed to write response:", err)
+		http.Error(w, fmt.Sprintf(`{"status" : "Failed to write response: %v"`, err), http.StatusInternalServerError)
 		return
 	}
 }

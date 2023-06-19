@@ -9,13 +9,14 @@ import (
 	"net/http"
 )
 
+// main is the entry point of the application
 func main() {
 	cfg, err := config.LoadConfig()
 	if err != nil {
 		log.Fatal("cannot load config:", err)
 	}
 
-	dbConnected, err := db.Connect(cfg)
+	dbConnected, err := db.Connect(cfg.DatabaseConfig)
 	if err != nil {
 		log.Fatal("cannot connect to db:", err)
 	}
