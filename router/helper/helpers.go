@@ -5,6 +5,7 @@ import (
 	"github.com/BurdockBH/food-delivery-rest-service/config"
 	"github.com/golang-jwt/jwt/v5"
 	"golang.org/x/crypto/bcrypt"
+	"net/http"
 	"time"
 )
 
@@ -61,4 +62,14 @@ func HashPassword(password string) (string, error) {
 
 func CompareHashedPassword(hashedPassword string, password string) error {
 	return bcrypt.CompareHashAndPassword([]byte(hashedPassword), []byte(password))
+}
+
+func BaseResponse(w http.ResponseWriter, response []byte, statusCode int) {
+	w.Header().Set("Content-Type", "application/json; charset=utf-8")
+	w.WriteHeader(statusCode)
+	_, err := w.Write(response)
+	if err != nil {
+		println("Error writing response:", err)
+		http.Error(w, "Error writing response", http.StatusInternalServerError)
+	}
 }

@@ -1,12 +1,12 @@
 package viewmodels
 
-// Response is the response model
-type Response struct {
+// BaseResponse is the response model
+type BaseResponse struct {
 	Status string `json:"status"`
 }
 
 // LoginResponse is the response model for login
 type LoginResponse struct {
-	Response
+	BaseResponse
 	AccessToken string `json:"token"`
 }
