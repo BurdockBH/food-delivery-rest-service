@@ -3,28 +3,17 @@
 DELIMITER //
 CREATE DEFINER=`root`@`localhost` PROCEDURE `EditUser`(
     IN inName VARCHAR(50),
-    IN oldEmail VARCHAR(140),
     IN inEmail VARCHAR(140),
     IN inHashedPassword TEXT,
     IN inPhone VARCHAR(20),
-    IN inUpdatedAt BIGINT
+    IN inUpdatedAt bigint
 )
 BEGIN
-    DECLARE userId INT;
-
-    SELECT id INTO userId FROM users WHERE email = oldEmail;
-
-    IF userId IS NOT NULL THEN
-        UPDATE users
-        SET name = inName,
-            email = inEmail,
-            password = inHashedPassword,
-            phone = inPhone,
-            updated_at = inUpdatedAt
-        WHERE id = userId;
-
-        SELECT 'EDITED' AS Message;
+    IF EXISTS (SELECT id FROM users WHERE email = email) THEN
+        UPDATE users SET name = inName, email = inEmail, password = inHashedPassword, phone = inPhone, updated_at = inUpdatedAt WHERE email = email;
+        SELECT 'UPDATED';
     END IF;
+
 END //
 DELIMITER ;
 -- +goose StatementEnd

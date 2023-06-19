@@ -2,13 +2,14 @@
 -- +goose StatementBegin
 DELIMITER //
 CREATE DEFINER=`root`@`localhost` PROCEDURE `DeleteUser`(
-    IN inEmail VARCHAR(140),
-    IN inHashedPassword TEXT
+    IN inEmail VARCHAR(140)
 )
 BEGIN
+    DECLARE userId INT;
+    SELECT id INTO userId FROM users WHERE email = inEmail;
 
-    IF EXISTS (SELECT id FROM users WHERE Email = inEmail) THEN
-        DELETE FROM users WHERE email = inEmail AND password = inHashedPassword;
+    IF userId IS NOT NULL THEN
+        DELETE FROM users WHERE id = userId AND email = inEmail;
         SELECT 'DELETED';
     END IF;
 

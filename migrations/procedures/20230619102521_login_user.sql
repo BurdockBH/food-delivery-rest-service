@@ -2,15 +2,10 @@
 -- +goose StatementBegin
 DELIMITER //
 CREATE DEFINER=`root`@`localhost` PROCEDURE `LoginUser`(
-    IN inEmail VARCHAR(140),
-    IN inPassword text
+    IN inEmail VARCHAR(140)
 )
 BEGIN
-
-    IF EXISTS (SELECT id FROM users WHERE email = inEmail AND password = inPassword) THEN
-        SELECT 'LOGGED IN';
-    END IF;
-
+    SELECT password FROM users WHERE email = inEmail;
 END //
 DELIMITER ;
 -- +goose StatementEnd
