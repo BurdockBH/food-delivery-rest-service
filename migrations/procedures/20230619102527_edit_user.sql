@@ -1,5 +1,6 @@
 -- +goose Up
 -- +goose StatementBegin
+DELIMITER //
 CREATE DEFINER=`root`@`localhost` PROCEDURE `EditUser`(
     IN inName VARCHAR(50),
     IN oldEmail VARCHAR(140),
@@ -24,10 +25,13 @@ BEGIN
 
         SELECT 'EDITED' AS Message;
     END IF;
-END
+END //
+DELIMITER ;
 -- +goose StatementEnd
 
 -- +goose Down
 -- +goose StatementBegin
+DELIMITER //
 DROP PROCEDURE IF EXISTS EditUser;
+DELIMITER ;
 -- +goose StatementEnd

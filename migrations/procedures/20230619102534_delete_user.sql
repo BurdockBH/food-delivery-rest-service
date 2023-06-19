@@ -1,5 +1,6 @@
 -- +goose Up
 -- +goose StatementBegin
+DELIMITER //
 CREATE DEFINER=`root`@`localhost` PROCEDURE `DeleteUser`(
     IN inEmail VARCHAR(140),
     IN inHashedPassword TEXT
@@ -11,10 +12,13 @@ BEGIN
         SELECT 'DELETED';
     END IF;
 
-END
+END //
+DELIMITER ;
 -- +goose StatementEnd
 
 -- +goose Down
 -- +goose StatementBegin
-DELETE PROCEDURE IF EXISTS `DeleteUser`;
+DELIMITER //
+DROP PROCEDURE IF EXISTS `DeleteUser`;
+DELIMITER ;
 -- +goose StatementEnd

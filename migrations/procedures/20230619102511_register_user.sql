@@ -1,5 +1,6 @@
 -- +goose Up
 -- +goose StatementBegin
+DELIMITER //
 CREATE DEFINER=`root`@`localhost` PROCEDURE `RegisterUser`(
     IN inName VARCHAR(50),
     IN inEmail VARCHAR(140),
@@ -21,11 +22,15 @@ BEGIN
 
         SELECT 1;
     END IF;
-END
+END //
+
+DELIMITER ;
 
 -- +goose StatementEnd
 
 -- +goose Down
 -- +goose StatementBegin
+DELIMITER //
 DROP PROCEDURE IF EXISTS `RegisterUser`;
+DELIMITER ;
 -- +goose StatementEnd
