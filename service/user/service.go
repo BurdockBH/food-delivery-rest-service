@@ -232,3 +232,36 @@ func EditUser(w http.ResponseWriter, r *http.Request) {
 	log.Println("User edited successfully!")
 	helper.BaseResponse(w, jsonResponse, http.StatusOK)
 }
+
+// GetUsers gets a user from the database
+func GetUsers(w http.ResponseWriter, r *http.Request) {
+	var u viewmodels.User
+
+	err := json.NewDecoder(r.Body).Decode(&u)
+	if err != nil {
+		log.Println("Failed to decode request body:", err)
+		response, _ := json.Marshal(viewmodels.BaseResponse{Status: "Failed to decode request body"})
+		helper.BaseResponse(w, response, http.StatusBadRequest)
+		return
+	}
+	defer r.Body.Close()
+
+	users, err := user.GetUsersByDetails(u)
+	if err != nil {
+		log.Println("Failed to get user:", err)
+		response, _ := json.Marshal(viewmodels.BaseResponse{Status: fmt.Sprintf("Failed to get user: %v", err)})
+		helper.BaseResponse(w, response, http.StatusInternalServerError)
+		return
+	}
+
+	jsonResponse, err := json.Marshal(viewmodels.UserList{Users: users, BaseResponse: viewmodels.BaseResponse{Status: "Users retrieved successfully!"}})
+	if err != nil {
+		log.Println("Failed to marshal json:", err)
+		response, _ := json.Marshal(viewmodels.BaseResponse{Status: fmt.Sprintf("Failed to marshal json: %v", err)})
+		helper.BaseResponse(w, response, http.StatusInternalServerError)
+		return
+	}
+
+	log.Println("User retrieved successfully!")
+	helper.BaseResponse(w, jsonResponse, http.StatusOK)
+}

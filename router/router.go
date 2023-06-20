@@ -15,6 +15,7 @@ func InitializeRouter() *http.ServeMux {
 	router.HandleFunc("/user/login", middlewares.Chain(middlewares.Post)(user.LoginUser))
 	router.HandleFunc("/user/delete", middlewares.Chain(middlewares.Delete)(user.DeleteUser))
 	router.HandleFunc("/user/edit", middlewares.Chain(middlewares.Put)(user.EditUser))
+	router.HandleFunc("/user/get", middlewares.Chain(middlewares.Get)(user.GetUsers))
 
 	return router
 }

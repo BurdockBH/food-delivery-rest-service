@@ -10,13 +10,28 @@ CREATE DEFINER=`root`@`localhost` PROCEDURE `EditUser`(
 )
 BEGIN
     DECLARE userId INT;
+    DECLARE existingUserPhoneCount INT;
+
+    -- Check if the user with the specified email exists
     SELECT id INTO userId FROM users WHERE email = inEmail;
-    IF userId IS NOT NULL THEN
-        UPDATE users SET name = inName, password = inHashedPassword, phone = inPhone, updated_at = inUpdatedAt WHERE id = userID AND email = inEmail;
-        SELECT 1;
-    ELSE SELECT 0;
+
+    IF userId IS NULL THEN
+        -- The user with the specified email does not exist, return an error
+        SELECT -1;
+    ELSE
+        -- Check if the phone number already exists for another user
+        SELECT COUNT(*) INTO existingUserPhoneCount FROM users WHERE phone = inPhone;
+
+        IF existingUserPhoneCount > 0 THEN
+            -- Another account with the same phone number already exists, return an error
+            SELECT -2;
+        ELSE
+            -- Update the user
+            UPDATE users SET name = inName, password = inHashedPassword, phone = inPhone, updated_at = inUpdatedAt WHERE id = userId AND email = inEmail;
+            SELECT 1;
+        END IF;
     END IF;
-END //
+END//
 DELIMITER ;
 -- +goose StatementEnd
 

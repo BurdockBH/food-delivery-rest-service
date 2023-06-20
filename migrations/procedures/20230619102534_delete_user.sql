@@ -12,7 +12,6 @@ BEGIN
         DELETE FROM users WHERE id = userId AND email = inEmail;
         SELECT 'DELETED';
     END IF;
-
 END //
 DELIMITER ;
 -- +goose StatementEnd
