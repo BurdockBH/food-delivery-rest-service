@@ -46,3 +46,13 @@ func Put(next http.HandlerFunc) http.HandlerFunc {
 		next(w, r)
 	}
 }
+
+func Get(next http.HandlerFunc) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		if r.Method != http.MethodGet && r.Method != http.MethodOptions {
+			http.Error(w, http.StatusText(http.StatusMethodNotAllowed), http.StatusMethodNotAllowed)
+			return
+		}
+		next(w, r)
+	}
+}

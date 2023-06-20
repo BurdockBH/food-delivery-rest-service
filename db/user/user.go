@@ -2,6 +2,7 @@ package user
 
 import (
 	"errors"
+	"fmt"
 	"github.com/BurdockBH/food-delivery-rest-service/db"
 	"github.com/BurdockBH/food-delivery-rest-service/router/helper"
 	"github.com/BurdockBH/food-delivery-rest-service/viewmodels"
@@ -24,7 +25,7 @@ func RegisterUser(u viewmodels.User) error {
 	query := "CALL RegisterUser(?, ?, ?, ?, ?, ?)"
 	st, err := db.DB.Prepare(query)
 	if err != nil {
-		log.Println(`Error preparing query "CALL RegisterUser(?, ?, ?, ?, ?, ?)"`, err)
+		log.Printf(`Error preparing query "CALL RegisterUser(%v, %v, %v, %v, %v, %v): %v"`, u.Name, u.Email, hashedPassword, u.Phone, time.Now().Unix(), time.Now().Unix(), err)
 		return err
 	}
 	defer st.Close()
@@ -37,8 +38,8 @@ func RegisterUser(u viewmodels.User) error {
 	}
 
 	if created == 0 {
-		log.Printf("User with that email already exists")
-		return errors.New("user with that email already exists")
+		log.Printf("User with email: %v or phone number: %v already exists", u.Email, u.Phone)
+		return errors.New(fmt.Sprintf("user with email %v or phone number %v already exists", u.Email, u.Phone))
 	}
 
 	return nil
@@ -52,14 +53,14 @@ func LoginUser(u viewmodels.UserLoginRequest) error {
 
 	st, err := db.DB.Prepare(query)
 	if err != nil {
-		log.Println(`Error preparing query "CALL LoginUser(?, ?)"`, err)
+		log.Printf(`Error preparing query "CALL LoginUser(%v)": %v`, u.Email, err)
 		return err
 	}
 
 	err = st.QueryRow(u.Email).Scan(&password)
 	if err != nil {
 		log.Println("User does not exist:", err)
-		return errors.New("user does not exist")
+		return errors.New(fmt.Sprintf("user %v does not exist", u.Email))
 	}
 
 	err = bcrypt.CompareHashAndPassword([]byte(password), []byte(u.Password))
@@ -73,12 +74,11 @@ func LoginUser(u viewmodels.UserLoginRequest) error {
 // DeleteUser deletes a user from the database
 func DeleteUser(u viewmodels.UserLoginRequest) error {
 	passwordQuery := "CALL LoginUser(?)"
-	var id int
 	var password string
-	err := db.DB.QueryRow(passwordQuery, u.Email).Scan(&id, &password)
+	err := db.DB.QueryRow(passwordQuery, u.Email).Scan(&password)
 	if err != nil {
 		log.Println("User does not exist:", err)
-		return errors.New("user does not exist")
+		return errors.New(fmt.Sprintf("user %v does not exist", u.Email))
 	}
 
 	err = helper.CompareHashedPassword(password, u.Password)
@@ -87,29 +87,24 @@ func DeleteUser(u viewmodels.UserLoginRequest) error {
 		return errors.New("error comparing password")
 	}
 
-	query := "CALL DeleteUser(?, ?)"
+	query := "CALL DeleteUser(?)"
 
 	st, err := db.DB.Prepare(query)
 	if err != nil {
-		log.Println(`Error preparing query "CALL DeleteUser(?, ?)"`, err)
+		log.Printf(`Error preparing query "CALL DeleteUser(%v)": %v`, u.Email, err)
 		return err
 	}
 
-	database, err := st.Exec(u.Email)
+	var deleted int
+	err = st.QueryRow(u.Email).Scan(&deleted)
 	if err != nil {
 		log.Printf("Failed to delete user with email %v. error is %v \n ", u.Email, err)
 		return err
 	}
 
-	rowsAffected, err := database.RowsAffected()
-	if err != nil {
-		log.Printf("Error with rows affected %v \n", err)
-		return err
-	}
-
-	if rowsAffected == 0 {
-		log.Printf("No rows affected")
-		return errors.New("no rows affected")
+	if deleted == 0 {
+		log.Printf("Couldn't delete %v. No rows affected\n", u.Email)
+		return errors.New(fmt.Sprintf("couldn't delete user %v. No rows affected", u.Email))
 	}
 
 	return nil
@@ -128,7 +123,7 @@ func EditUser(tokenString string, u viewmodels.User) error {
 
 	st, err := db.DB.Prepare(query)
 	if err != nil {
-		log.Println(`Error preparing query "CALL EditUser"`, err)
+		log.Printf(`Error preparing query "CALL EditUser(%v, %v, %v, %v, %v": %v`, u.Name, u.Email, u.Password, u.Phone, time.Now().Unix(), err)
 		return err
 	}
 
@@ -145,10 +140,48 @@ func EditUser(tokenString string, u viewmodels.User) error {
 		return err
 	}
 
-	if updated == 0 {
-		log.Printf("User with that email does not exist")
-		return errors.New("user with that email does not exist")
+	if updated == -1 {
+		log.Printf("User with email %v does not exist", u.Email)
+		return errors.New(fmt.Sprintf("user with email %v does not exist", u.Email))
+	} else if updated == -2 {
+		log.Printf("User with phone number: %v does not exist", u.Phone)
+		return errors.New(fmt.Sprintf("user with phone number: %v does not exist", u.Phone))
 	}
 
 	return nil
+}
+
+func GetUsersByDetails(u viewmodels.User) ([]viewmodels.User, error) {
+	query := "CALL GetUsersByDetails(?, ?, ?)"
+	st, err := db.DB.Prepare(query)
+	if err != nil {
+		log.Printf(`Error preparing query "CALL GetUsersByDetails(%v, %v, %v)": %v`, u.Name, u.Email, u.Phone, err)
+		return nil, errors.New("error preparing query")
+	}
+	defer st.Close()
+
+	rows, err := st.Query(u.Name, u.Email, u.Phone)
+	if err != nil {
+		log.Println("Error executing query:", err)
+		return nil, errors.New("error executing query")
+	}
+	defer rows.Close()
+
+	var users []viewmodels.User
+	for rows.Next() {
+		var user viewmodels.User
+		err = rows.Scan(&user.ID, &user.Name, &user.Email, &user.Password, &user.Phone, &user.CreatedAt, &user.UpdatedAt)
+		if err != nil {
+			log.Println("Error scanning row:", err)
+			users = append(users, viewmodels.User{})
+		}
+		users = append(users, user)
+	}
+
+	if users == nil {
+		log.Println("No users found")
+		return nil, errors.New("no users found")
+	}
+
+	return users, nil
 }
