@@ -1,6 +1,6 @@
 -- +goose Up
 -- +goose StatementBegin
-CREATE TABLE food_venues (
+CREATE TABLE IF NOT EXISTS food_venues (
                              id INT PRIMARY KEY AUTO_INCREMENT,
                              name VARCHAR(255) NOT NULL,
                              address VARCHAR(255) NOT NULL,
