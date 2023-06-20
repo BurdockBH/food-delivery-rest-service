@@ -122,6 +122,14 @@ func DeleteUser(w http.ResponseWriter, r *http.Request) {
 
 	var userLogin viewmodels.UserLoginRequest
 
+	err = json.NewDecoder(r.Body).Decode(&userLogin)
+	if err != nil {
+		log.Println("Failed to decode request body:", err)
+		response, _ := json.Marshal(viewmodels.BaseResponse{Status: "Failed to decode request body"})
+		helper.BaseResponse(w, response, http.StatusBadRequest)
+		return
+	}
+
 	err = userLogin.ValidateLogin()
 	if err != nil {
 		log.Println("Failed to validate login:", err)
