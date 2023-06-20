@@ -11,11 +11,11 @@ func InitializeRouter() *http.ServeMux {
 	router := http.NewServeMux()
 
 	// User routes
-	router.HandleFunc("/user/register", middlewares.Chain(middlewares.Post)(user.RegisterUser))
-	router.HandleFunc("/user/login", middlewares.Chain(middlewares.Post)(user.LoginUser))
-	router.HandleFunc("/user/delete", middlewares.Chain(middlewares.Delete)(user.DeleteUser))
-	router.HandleFunc("/user/edit", middlewares.Chain(middlewares.Put)(user.EditUser))
-	router.HandleFunc("/user/get", middlewares.Chain(middlewares.Get)(user.GetUsers))
+	router.HandleFunc("/users/register", middlewares.Chain(middlewares.Post)(user.RegisterUser))
+	router.HandleFunc("/users/login", middlewares.Chain(middlewares.Post)(user.LoginUser))
+	router.HandleFunc("/users/delete", middlewares.Chain(middlewares.Delete)(user.DeleteUser))
+	router.HandleFunc("/users/edit", middlewares.Chain(middlewares.Put)(user.EditUser))
+	router.HandleFunc("/users/get", middlewares.Chain(middlewares.Get)(user.GetUsers))
 
 	return router
 }

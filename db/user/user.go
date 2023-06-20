@@ -38,8 +38,8 @@ func RegisterUser(u viewmodels.User) error {
 	}
 
 	if created == 0 {
-		log.Printf("User with that email or phone number already exists")
-		return errors.New("user with that email or phone number already exists")
+		log.Printf("User with email: %v or phone number: %v already exists", u.Email, u.Phone)
+		return errors.New(fmt.Sprintf("user with email %v or phone number %v already exists", u.Email, u.Phone))
 	}
 
 	return nil
@@ -141,11 +141,11 @@ func EditUser(tokenString string, u viewmodels.User) error {
 	}
 
 	if updated == -1 {
-		log.Printf("User with that email does not exist")
-		return errors.New("user with that email does not exist")
+		log.Printf("User with email %v does not exist", u.Email)
+		return errors.New(fmt.Sprintf("user with email %v does not exist", u.Email))
 	} else if updated == -2 {
-		log.Printf("User with that phone number already exists")
-		return errors.New("user with that phone number already exists")
+		log.Printf("User with phone number: %v does not exist", u.Phone)
+		return errors.New(fmt.Sprintf("user with phone number: %v does not exist", u.Phone))
 	}
 
 	return nil
@@ -170,10 +170,10 @@ func GetUsersByDetails(u viewmodels.User) ([]viewmodels.User, error) {
 	var users []viewmodels.User
 	for rows.Next() {
 		var user viewmodels.User
-		err := rows.Scan(&user.ID, &user.Name, &user.Email, &user.Password, &user.Phone, &user.CreatedAt, &user.UpdatedAt)
+		err = rows.Scan(&user.ID, &user.Name, &user.Email, &user.Password, &user.Phone, &user.CreatedAt, &user.UpdatedAt)
 		if err != nil {
 			log.Println("Error scanning row:", err)
-			return nil, errors.New("error scanning row")
+			users = append(users, viewmodels.User{})
 		}
 		users = append(users, user)
 	}

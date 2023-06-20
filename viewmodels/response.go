@@ -2,7 +2,8 @@ package viewmodels
 
 // BaseResponse is the response model
 type BaseResponse struct {
-	Status string `json:"status"`
+	StatusCode int64  `json:"status code"`
+	Message    string `json:"message"`
 }
 
 type UserList struct {
