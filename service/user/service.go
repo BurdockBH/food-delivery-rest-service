@@ -122,22 +122,6 @@ func DeleteUser(w http.ResponseWriter, r *http.Request) {
 
 	var userLogin viewmodels.UserLoginRequest
 
-	err = json.NewDecoder(r.Body).Decode(&userLogin)
-	if err != nil {
-		log.Println("Failed to decode request body:", err)
-		response, _ := json.Marshal(viewmodels.BaseResponse{Status: "Failed to decode request body"})
-		helper.BaseResponse(w, response, http.StatusBadRequest)
-		return
-	}
-
-	err = userLogin.ValidateLogin()
-	if err != nil {
-		log.Println("Failed to validate login:", err)
-		response, _ := json.Marshal(viewmodels.BaseResponse{Status: fmt.Sprintf("Failed to validate login: %v", err)})
-		helper.BaseResponse(w, response, http.StatusBadRequest)
-		return
-	}
-
 	if _, ok := claims["email"]; !ok {
 		log.Println("Invalid claim")
 		response, _ := json.Marshal(viewmodels.BaseResponse{Status: "Invalid claim"})
@@ -154,6 +138,14 @@ func DeleteUser(w http.ResponseWriter, r *http.Request) {
 	}
 	defer r.Body.Close()
 
+	err = userLogin.ValidateLogin()
+	if err != nil {
+		log.Println("Failed to validate login:", err)
+		response, _ := json.Marshal(viewmodels.BaseResponse{Status: fmt.Sprintf("Failed to validate login: %v", err)})
+		helper.BaseResponse(w, response, http.StatusBadRequest)
+		return
+	}
+
 	err = user.DeleteUser(userLogin)
 	if err != nil {
 		log.Println("Failed to delete user:", err)
@@ -162,7 +154,7 @@ func DeleteUser(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	log.Println("User deleted successfully!")
+	log.Printf("User %v deleted successfully!\n", userLogin.Email)
 	response, _ := json.Marshal(viewmodels.BaseResponse{Status: "User deleted successfully!"})
 	helper.BaseResponse(w, response, http.StatusOK)
 }

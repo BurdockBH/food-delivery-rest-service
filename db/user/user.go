@@ -2,6 +2,7 @@ package user
 
 import (
 	"errors"
+	"fmt"
 	"github.com/BurdockBH/food-delivery-rest-service/db"
 	"github.com/BurdockBH/food-delivery-rest-service/router/helper"
 	"github.com/BurdockBH/food-delivery-rest-service/viewmodels"
@@ -73,9 +74,8 @@ func LoginUser(u viewmodels.UserLoginRequest) error {
 // DeleteUser deletes a user from the database
 func DeleteUser(u viewmodels.UserLoginRequest) error {
 	passwordQuery := "CALL LoginUser(?)"
-	var id int
 	var password string
-	err := db.DB.QueryRow(passwordQuery, u.Email).Scan(&id, &password)
+	err := db.DB.QueryRow(passwordQuery, u.Email).Scan(&password)
 	if err != nil {
 		log.Println("User does not exist:", err)
 		return errors.New("user does not exist")
@@ -95,21 +95,16 @@ func DeleteUser(u viewmodels.UserLoginRequest) error {
 		return err
 	}
 
-	database, err := st.Exec(u.Email)
+	var deleted int
+	err = st.QueryRow(u.Email).Scan(&deleted)
 	if err != nil {
 		log.Printf("Failed to delete user with email %v. error is %v \n ", u.Email, err)
 		return err
 	}
 
-	rowsAffected, err := database.RowsAffected()
-	if err != nil {
-		log.Printf("Error with rows affected %v \n", err)
-		return err
-	}
-
-	if rowsAffected == 0 {
-		log.Printf("No rows affected")
-		return errors.New("no rows affected")
+	if deleted == 0 {
+		log.Printf("Couldn't delete %v. No rows affected\n", u.Email)
+		return errors.New(fmt.Sprintf("couldn't delete user %v. No rows affected", u.Email))
 	}
 
 	return nil
