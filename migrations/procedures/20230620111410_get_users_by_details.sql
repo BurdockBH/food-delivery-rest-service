@@ -8,9 +8,9 @@ CREATE DEFINER=`root`@`localhost` PROCEDURE `GetUsersByDetails`(
 )
 BEGIN
     IF inName = '' AND inPhone = '' AND inEmail = '' THEN
-        SELECT * FROM users;
+        SELECT id, name, email, password, phone, created_at, updated_at FROM users;
     ELSE
-        SELECT *
+        SELECT id, name, email, password, phone, created_at, updated_at
         FROM users
         WHERE (inName = '' OR name = inName)
           AND (inPhone = '' OR phone = inPhone)

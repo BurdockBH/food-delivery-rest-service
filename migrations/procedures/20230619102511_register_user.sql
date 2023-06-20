@@ -11,7 +11,7 @@ CREATE DEFINER=`root`@`localhost` PROCEDURE `RegisterUser`(
 )
 BEGIN
 
-    IF (SELECT COUNT(*) FROM users WHERE email = inEmail) + (SELECT COUNT(*) FROM users WHERE phone = inPhone) > 0 THEN
+    IF (SELECT COUNT(*) FROM users WHERE email = inEmail) OR (SELECT COUNT(*) FROM users WHERE phone = inPhone) > 0 THEN
         SELECT 0;
     ELSE
         INSERT INTO users (name, email, password, phone, created_at, updated_at)
