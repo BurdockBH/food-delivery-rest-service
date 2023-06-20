@@ -24,7 +24,7 @@ func RegisterUser(u viewmodels.User) error {
 	query := "CALL RegisterUser(?, ?, ?, ?, ?, ?)"
 	st, err := db.DB.Prepare(query)
 	if err != nil {
-		log.Println(`Error preparing query "CALL RegisterUser(?, ?, ?, ?, ?, ?)"`, err)
+		log.Printf(`Error preparing query "CALL RegisterUser(%v, %v, %v, %v, %v, %v): %v"`, u.Name, u.Email, hashedPassword, u.Phone, time.Now().Unix(), time.Now().Unix(), err)
 		return err
 	}
 	defer st.Close()
@@ -52,7 +52,7 @@ func LoginUser(u viewmodels.UserLoginRequest) error {
 
 	st, err := db.DB.Prepare(query)
 	if err != nil {
-		log.Println(`Error preparing query "CALL LoginUser(?, ?)"`, err)
+		log.Printf(`Error preparing query "CALL LoginUser(%v)": %v`, u.Email, err)
 		return err
 	}
 
@@ -87,11 +87,11 @@ func DeleteUser(u viewmodels.UserLoginRequest) error {
 		return errors.New("error comparing password")
 	}
 
-	query := "CALL DeleteUser(?, ?)"
+	query := "CALL DeleteUser(?)"
 
 	st, err := db.DB.Prepare(query)
 	if err != nil {
-		log.Println(`Error preparing query "CALL DeleteUser(?, ?)"`, err)
+		log.Printf(`Error preparing query "CALL DeleteUser(%v)": %v`, u.Email, err)
 		return err
 	}
 
@@ -128,7 +128,7 @@ func EditUser(tokenString string, u viewmodels.User) error {
 
 	st, err := db.DB.Prepare(query)
 	if err != nil {
-		log.Println(`Error preparing query "CALL EditUser"`, err)
+		log.Printf(`Error preparing query "CALL EditUser(%v, %v, %v, %v, %v": %v`, u.Name, u.Email, u.Password, u.Phone, time.Now().Unix(), err)
 		return err
 	}
 
@@ -160,7 +160,7 @@ func GetUsersByDetails(u viewmodels.User) ([]viewmodels.User, error) {
 	query := "CALL GetUsersByDetails(?, ?, ?)"
 	st, err := db.DB.Prepare(query)
 	if err != nil {
-		log.Println(`Error preparing query "CALL GetUsersByDetails(?, ?, ?)"`, err)
+		log.Printf(`Error preparing query "CALL GetUsersByDetails(%v, %v, %v)": %v`, u.Name, u.Email, u.Phone, err)
 		return nil, errors.New("error preparing query")
 	}
 	defer st.Close()
