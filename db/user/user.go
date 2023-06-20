@@ -60,7 +60,7 @@ func LoginUser(u viewmodels.UserLoginRequest) error {
 	err = st.QueryRow(u.Email).Scan(&password)
 	if err != nil {
 		log.Println("User does not exist:", err)
-		return errors.New("user does not exist")
+		return errors.New(fmt.Sprintf("user %v does not exist", u.Email))
 	}
 
 	err = bcrypt.CompareHashAndPassword([]byte(password), []byte(u.Password))
@@ -78,7 +78,7 @@ func DeleteUser(u viewmodels.UserLoginRequest) error {
 	err := db.DB.QueryRow(passwordQuery, u.Email).Scan(&password)
 	if err != nil {
 		log.Println("User does not exist:", err)
-		return errors.New("user does not exist")
+		return errors.New(fmt.Sprintf("user %v does not exist", u.Email))
 	}
 
 	err = helper.CompareHashedPassword(password, u.Password)

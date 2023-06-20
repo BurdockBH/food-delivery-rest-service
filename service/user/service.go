@@ -76,7 +76,7 @@ func LoginUser(w http.ResponseWriter, r *http.Request) {
 		log.Println("Failed to validate login:", err)
 		response, _ := json.Marshal(viewmodels.BaseResponse{
 			StatusCode: statusCodes.FailedToValidateLogin,
-			Message:    statusCodes.StatusCodes[statusCodes.FailedToValidateLogin] + err.Error(),
+			Message:    statusCodes.StatusCodes[statusCodes.FailedToValidateLogin] + ":" + err.Error(),
 		})
 		helper.BaseResponse(w, response, http.StatusBadRequest)
 		return
@@ -87,7 +87,7 @@ func LoginUser(w http.ResponseWriter, r *http.Request) {
 		log.Println("Failed to login user: ", userLogin.Email, err)
 		response, _ := json.Marshal(viewmodels.BaseResponse{
 			StatusCode: statusCodes.FailedToLoginUser,
-			Message:    statusCodes.StatusCodes[statusCodes.FailedToLoginUser] + err.Error(),
+			Message:    statusCodes.StatusCodes[statusCodes.FailedToLoginUser] + ":" + err.Error(),
 		})
 		helper.BaseResponse(w, response, http.StatusInternalServerError)
 		return
@@ -98,7 +98,7 @@ func LoginUser(w http.ResponseWriter, r *http.Request) {
 		log.Println("Failed to generate token:", err)
 		response, _ := json.Marshal(viewmodels.BaseResponse{
 			StatusCode: statusCodes.FailedToGenerateToken,
-			Message:    statusCodes.StatusCodes[statusCodes.FailedToGenerateToken] + err.Error(),
+			Message:    statusCodes.StatusCodes[statusCodes.FailedToGenerateToken] + ":" + err.Error(),
 		})
 		helper.BaseResponse(w, response, http.StatusInternalServerError)
 		return
@@ -112,7 +112,7 @@ func LoginUser(w http.ResponseWriter, r *http.Request) {
 		log.Println("Failed to marshal json:", err)
 		response, _ := json.Marshal(viewmodels.BaseResponse{
 			StatusCode: statusCodes.FailedToMarshalJSON,
-			Message:    statusCodes.StatusCodes[statusCodes.FailedToMarshalJSON] + err.Error(),
+			Message:    statusCodes.StatusCodes[statusCodes.FailedToMarshalJSON] + ":" + err.Error(),
 		})
 		helper.BaseResponse(w, response, http.StatusInternalServerError)
 		return
@@ -126,7 +126,7 @@ func LoginUser(w http.ResponseWriter, r *http.Request) {
 		log.Println("Failed to write response:", err)
 		response, _ := json.Marshal(viewmodels.BaseResponse{
 			StatusCode: statusCodes.FailedToWriteResponse,
-			Message:    statusCodes.StatusCodes[statusCodes.FailedToWriteResponse] + err.Error(),
+			Message:    statusCodes.StatusCodes[statusCodes.FailedToWriteResponse] + ":" + err.Error(),
 		})
 		helper.BaseResponse(w, response, http.StatusInternalServerError)
 		return
@@ -188,7 +188,7 @@ func DeleteUser(w http.ResponseWriter, r *http.Request) {
 		log.Println("Failed to validate login:", err)
 		response, _ := json.Marshal(viewmodels.BaseResponse{
 			StatusCode: statusCodes.FailedToValidateLogin,
-			Message:    statusCodes.StatusCodes[statusCodes.FailedToValidateLogin] + err.Error(),
+			Message:    statusCodes.StatusCodes[statusCodes.FailedToValidateLogin] + ":" + err.Error(),
 		})
 		helper.BaseResponse(w, response, http.StatusBadRequest)
 		return
@@ -199,7 +199,7 @@ func DeleteUser(w http.ResponseWriter, r *http.Request) {
 		log.Println("Failed to delete user:", err)
 		response, _ := json.Marshal(viewmodels.BaseResponse{
 			StatusCode: statusCodes.FailedToDeleteUser,
-			Message:    statusCodes.StatusCodes[statusCodes.FailedToDeleteUser] + err.Error(),
+			Message:    statusCodes.StatusCodes[statusCodes.FailedToDeleteUser] + ":" + err.Error(),
 		})
 		helper.BaseResponse(w, response, http.StatusInternalServerError)
 		return
@@ -233,7 +233,7 @@ func EditUser(w http.ResponseWriter, r *http.Request) {
 		log.Println("Token validation failed:", err)
 		response, _ := json.Marshal(viewmodels.BaseResponse{
 			StatusCode: statusCodes.TokenValidationFailed,
-			Message:    statusCodes.StatusCodes[statusCodes.TokenValidationFailed] + err.Error(),
+			Message:    statusCodes.StatusCodes[statusCodes.TokenValidationFailed] + ":" + err.Error(),
 		})
 		helper.BaseResponse(w, response, http.StatusBadRequest)
 		return
@@ -268,7 +268,7 @@ func EditUser(w http.ResponseWriter, r *http.Request) {
 		log.Println("Failed to validate login:", err)
 		response, _ := json.Marshal(viewmodels.BaseResponse{
 			StatusCode: statusCodes.FailedToValidateLogin,
-			Message:    statusCodes.StatusCodes[statusCodes.FailedToValidateLogin] + err.Error(),
+			Message:    statusCodes.StatusCodes[statusCodes.FailedToValidateLogin] + ":" + err.Error(),
 		})
 		helper.BaseResponse(w, response, http.StatusBadRequest)
 		return
@@ -279,7 +279,7 @@ func EditUser(w http.ResponseWriter, r *http.Request) {
 		log.Println("Failed to update user:", err)
 		response, _ := json.Marshal(viewmodels.BaseResponse{
 			StatusCode: statusCodes.FailedToUpdateUser,
-			Message:    statusCodes.StatusCodes[statusCodes.FailedToUpdateUser] + err.Error(),
+			Message:    statusCodes.StatusCodes[statusCodes.FailedToUpdateUser] + ":" + err.Error(),
 		})
 		helper.BaseResponse(w, response, http.StatusInternalServerError)
 		return
@@ -290,7 +290,7 @@ func EditUser(w http.ResponseWriter, r *http.Request) {
 		log.Println("Failed to generate token:", err)
 		response, _ := json.Marshal(viewmodels.BaseResponse{
 			StatusCode: statusCodes.FailedToGenerateToken,
-			Message:    statusCodes.StatusCodes[statusCodes.FailedToGenerateToken] + err.Error(),
+			Message:    statusCodes.StatusCodes[statusCodes.FailedToGenerateToken] + ":" + err.Error(),
 		})
 		helper.BaseResponse(w, response, http.StatusInternalServerError)
 		return
@@ -334,7 +334,7 @@ func GetUsers(w http.ResponseWriter, r *http.Request) {
 		log.Println("Failed to get user:", err)
 		response, _ := json.Marshal(viewmodels.BaseResponse{
 			StatusCode: statusCodes.FailedToFetchUsers,
-			Message:    statusCodes.StatusCodes[statusCodes.FailedToFetchUsers] + err.Error(),
+			Message:    statusCodes.StatusCodes[statusCodes.FailedToFetchUsers] + ":" + err.Error(),
 		})
 		helper.BaseResponse(w, response, http.StatusInternalServerError)
 		return
@@ -348,7 +348,7 @@ func GetUsers(w http.ResponseWriter, r *http.Request) {
 		log.Println("Failed to marshal json:", err)
 		response, _ := json.Marshal(viewmodels.BaseResponse{
 			StatusCode: statusCodes.FailedToMarshalJSON,
-			Message:    statusCodes.StatusCodes[statusCodes.FailedToMarshalJSON] + err.Error(),
+			Message:    statusCodes.StatusCodes[statusCodes.FailedToMarshalJSON] + ":" + err.Error(),
 		})
 		helper.BaseResponse(w, response, http.StatusInternalServerError)
 		return
