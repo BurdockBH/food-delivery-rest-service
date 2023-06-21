@@ -1,7 +1,6 @@
 -- +goose Up
 -- +goose StatementBegin
-DELIMITER //
-CREATE DEFINER=`root`@`localhost` PROCEDURE `EditUser`(
+CREATE PROCEDURE `EditUser`(
     IN inName VARCHAR(50),
     IN inEmail VARCHAR(140),
     IN inHashedPassword TEXT,
@@ -22,13 +21,10 @@ BEGIN
             SELECT 1;
         END IF;
     END IF;
-END//
-DELIMITER ;
+END
 -- +goose StatementEnd
 
 -- +goose Down
 -- +goose StatementBegin
-DELIMITER //
 DROP PROCEDURE IF EXISTS EditUser;
-DELIMITER ;
 -- +goose StatementEnd

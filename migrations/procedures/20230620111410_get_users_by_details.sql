@@ -1,7 +1,6 @@
 -- +goose Up
 -- +goose StatementBegin
-DELIMITER //
-CREATE DEFINER=`root`@`localhost` PROCEDURE `GetUsersByDetails`(
+CREATE PROCEDURE `GetUsersByDetails`(
     IN inName VARCHAR(50),
     IN inEmail VARCHAR(50),
     IN inPhone VARCHAR(50)
@@ -16,14 +15,10 @@ BEGIN
           AND (inPhone = '' OR phone = inPhone)
           AND (inEmail = '' OR email = inEmail);
     END IF;
-END //
-
-DELIMITER ;
+END
 -- +goose StatementEnd
 
 -- +goose Down
 -- +goose StatementBegin
-DELIMITER //
 DROP PROCEDURE IF EXISTS `GetUsersByDetails`;
-DELIMITER ;
 -- +goose StatementEnd
