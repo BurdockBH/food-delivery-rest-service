@@ -1,52 +1,75 @@
 package viewmodels
 
 import (
+	"log"
 	"testing"
 	"time"
 )
 
+type testCase struct {
+	ExpectedResult string
+	Name           string
+	Data           interface{}
+}
+
 func TestUser_Validate(t *testing.T) {
 
-	var testCases = []User{
+	var testCases = []testCase{
 		{
-			Name:      "Edo123",
-			Email:     "edocicak@gmail.com",
-			Password:  "password",
-			Phone:     "1234567890",
-			CreatedAt: time.Now().Unix(),
-			UpdatedAt: time.Now().Unix(),
+			Name:           "request User failed because of invalid name",
+			ExpectedResult: "invalid name",
+			Data: User{
+				Name:      "Edo123",
+				Email:     "edocicak@gmail.com",
+				Password:  "password",
+				Phone:     "1234567890",
+				CreatedAt: time.Now().Unix(),
+				UpdatedAt: time.Now().Unix(),
+			},
 		},
 		{
-			Name:      "Burdock",
-			Email:     "edodafkoa.com",
-			Password:  "password",
-			Phone:     "1234567890",
-			CreatedAt: time.Now().Unix(),
-			UpdatedAt: time.Now().Unix(),
+			Name:           "request User failed because of invalid email",
+			ExpectedResult: "invalid email",
+			Data: User{
+				Name:      "Burdock",
+				Email:     "edocicakgmail.com",
+				Password:  "password",
+				Phone:     "1234567890",
+				CreatedAt: time.Now().Unix(),
+				UpdatedAt: time.Now().Unix(),
+			},
 		},
 		{
-			Name:      "Burdock",
-			Email:     "edocicak@gmail.com",
-			Password:  "pass",
-			Phone:     "1234567890",
-			CreatedAt: time.Now().Unix(),
-			UpdatedAt: time.Now().Unix(),
+			Name:           "request User failed because of invalid phone",
+			ExpectedResult: "invalid phone",
+			Data: User{
+				Email:     "edocicak@gmail.com",
+				Password:  "pass",
+				Phone:     "1234567890",
+				CreatedAt: time.Now().Unix(),
+				UpdatedAt: time.Now().Unix(),
+			},
 		},
 		{
-			Name:      "Burdock",
-			Email:     "edocicak@gmail.com",
-			Password:  "password",
-			Phone:     "1234567abcd",
-			CreatedAt: time.Now().Unix(),
-			UpdatedAt: time.Now().Unix(),
+			Name:           "request User failed because of invalid password",
+			ExpectedResult: "invalid password",
+			Data: User{
+				Email:     "edocicak@gmail.com",
+				Password:  "password",
+				Phone:     "1234567abcd",
+				CreatedAt: time.Now().Unix(),
+				UpdatedAt: time.Now().Unix(),
+			},
 		},
 	}
 
 	failed := false
 	for _, u := range testCases {
-		err := u.Validate()
-		if err == nil {
-			t.Errorf("User: %v should have failed validation", u.Name)
+		user := u.Data.(User)
+		err := user.Validate()
+		if err.Error() != u.ExpectedResult {
+			t.Errorf("%v unexpected error: %v", u.Name, err.Error())
+			log.Printf("%v unexpected error: %v", u.Name, err.Error())
 			failed = true
 		}
 	}
@@ -74,22 +97,32 @@ func TestUser_Validate(t *testing.T) {
 }
 
 func TestUserLoginRequest_ValidateLogin(t *testing.T) {
-	testCases := []UserLoginRequest{
+	testCases := []testCase{
 		{
-			Email:    "edocicak.com",
-			Password: "password",
+			Name:           "request UserLogin failed because of invalid email",
+			ExpectedResult: "invalid email",
+			Data: UserLoginRequest{
+				Email:    "edocicak.com",
+				Password: "password",
+			},
 		},
 		{
-			Email:    "edocicak@gmail.com",
-			Password: "passasdofjadsjfoiaj0erjt0j092j9i2",
+			Name:           "request UserLogin failed because of invalid password",
+			ExpectedResult: "invalid password",
+			Data: UserLoginRequest{
+				Email:    "edocicak@gmail.com",
+				Password: "passasdofjadsjfoiaj0erjt0j092j9i2",
+			},
 		},
 	}
 
 	failed := false
 	for _, u := range testCases {
-		err := u.ValidateLogin()
-		if err == nil {
-			t.Errorf("User: %v should have failed validation", u.Email)
+		user := u.Data.(UserLoginRequest)
+		err := user.ValidateLogin()
+		if err.Error() != u.ExpectedResult {
+			t.Errorf("%v unexpected error: %v", u.Name, err.Error())
+			log.Printf("%v unexpected error: %v", u.Name, err.Error())
 			failed = true
 		}
 	}
@@ -102,6 +135,7 @@ func TestUserLoginRequest_ValidateLogin(t *testing.T) {
 	err := correctUserLogin.ValidateLogin()
 	if err != nil {
 		t.Errorf("Error on valid data: %v", correctUserLogin.Email)
+		log.Printf("Error on valid data: %v", correctUserLogin.Email)
 		return
 	}
 
