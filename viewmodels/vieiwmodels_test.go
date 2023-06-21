@@ -7,15 +7,9 @@ import (
 	"time"
 )
 
-type testCase struct {
-	ExpectedResult error
-	Name           string
-	Data           interface{}
-}
-
 func TestUser_Validate(t *testing.T) {
 
-	var testCases = []testCase{
+	var TestCases = []TestCase{
 		{
 			Name:           "request User failed because of invalid name",
 			ExpectedResult: errors.New("invalid name"),
@@ -79,14 +73,10 @@ func TestUser_Validate(t *testing.T) {
 	}
 
 	failed := false
-	for _, u := range testCases {
+	for _, u := range TestCases {
 		user := u.Data.(User)
 		err := user.Validate()
-		if err != nil && err.Error() != u.ExpectedResult.Error() {
-			t.Errorf("Test for %v\nShould get error: %v but got: %v", u.Name, err, u.ExpectedResult)
-			log.Printf("Test for %v\nShould get error: %v but got: %v", u.Name, err, u.ExpectedResult)
-			failed = true
-		} else if err == nil && u.ExpectedResult != nil {
+		if (err != nil && err.Error() != u.ExpectedResult.Error()) || (err == nil && u.ExpectedResult != nil) {
 			t.Errorf("Test for %v\nShould get error: %v but got: %v", u.Name, err, u.ExpectedResult)
 			log.Printf("Test for %v\nShould get error: %v but got: %v", u.Name, err, u.ExpectedResult)
 			failed = true
@@ -101,7 +91,7 @@ func TestUser_Validate(t *testing.T) {
 }
 
 func TestUserLoginRequest_ValidateLogin(t *testing.T) {
-	testCases := []testCase{
+	TestCases := []TestCase{
 		{
 			Name:           "request UserLogin failed because of invalid email",
 			ExpectedResult: errors.New("invalid email"),
@@ -118,29 +108,25 @@ func TestUserLoginRequest_ValidateLogin(t *testing.T) {
 				Password: "passasdofjadsjfoiaj0erjt0j092j9i2",
 			},
 		},
+		{
+			Name:           "all data is valid, should return nil",
+			ExpectedResult: nil,
+			Data: UserLoginRequest{
+				Email:    "edocicak@gmail.com",
+				Password: "password",
+			},
+		},
 	}
 
 	failed := false
-	for _, u := range testCases {
+	for _, u := range TestCases {
 		user := u.Data.(UserLoginRequest)
 		err := user.ValidateLogin()
-		if err != u.ExpectedResult {
-			t.Errorf("%v unexpected error: %v", u.Name, err.Error())
-			log.Printf("%v unexpected error: %v", u.Name, err.Error())
+		if (err != nil && err.Error() != u.ExpectedResult.Error()) || (err == nil && u.ExpectedResult != nil) {
+			t.Errorf("Test for %v\nShould get error: %v but got: %v", u.Name, err, u.ExpectedResult)
+			log.Printf("Test for %v\nShould get error: %v but got: %v", u.Name, err, u.ExpectedResult)
 			failed = true
 		}
-	}
-
-	correctUserLogin := UserLoginRequest{
-		Email:    "edocicak@gmail.com",
-		Password: "password123",
-	}
-
-	err := correctUserLogin.ValidateLogin()
-	if err != nil {
-		t.Errorf("Error on valid data: %v", correctUserLogin.Email)
-		log.Printf("Error on valid data: %v", correctUserLogin.Email)
-		return
 	}
 
 	if failed {
@@ -151,43 +137,46 @@ func TestUserLoginRequest_ValidateLogin(t *testing.T) {
 }
 
 func TestProduct_ValidateProduct(t *testing.T) {
-	testCases := []Product{
+	TestCases := []TestCase{
 		{
-			Name:        "",
-			Description: "A delicious burger",
-			Price:       5.99,
+			Name:           "request Product failed because of invalid name",
+			ExpectedResult: errors.New("name cannot be empty"),
+			Data: Product{
+				Name:        "",
+				Description: "A delicious burger",
+				Price:       5.99,
+			},
 		},
 		{
-			Name:        "Burger",
-			Description: "",
-			Price:       5.99,
+			Name:           "request Product failed because of invalid description",
+			ExpectedResult: errors.New("description cannot be empty"),
+			Data: Product{
+				Name:        "Burger",
+				Description: "",
+				Price:       5.99,
+			},
 		},
 		{
-			Name:        "Burger",
-			Description: "A delicious burger",
-			Price:       -5.99,
+			Name:           "request Product failed because of invalid price",
+			ExpectedResult: errors.New("price cannot be negative"),
+			Data: Product{
+				Name: "Burger",
+
+				Description: "A delicious burger",
+				Price:       -5.99,
+			},
 		},
 	}
 
 	failed := false
-	for _, p := range testCases {
-		err := p.ValidateProduct()
-		if err == nil {
-			t.Errorf("Product: %v should have failed validation", p.Name)
+	for _, u := range TestCases {
+		user := u.Data.(Product)
+		err := user.ValidateProduct()
+		if (err != nil && err.Error() != u.ExpectedResult.Error()) || (err == nil && u.ExpectedResult != nil) {
+			t.Errorf("Test for %v\nShould get error: %v but got: %v", u.Name, err, u.ExpectedResult)
+			log.Printf("Test for %v\nShould get error: %v but got: %v", u.Name, err, u.ExpectedResult)
 			failed = true
 		}
-	}
-
-	correctProduct := Product{
-		Name:        "Burger",
-		Description: "A delicious burger",
-		Price:       5.99,
-	}
-
-	err := correctProduct.ValidateProduct()
-	if err != nil {
-		t.Errorf("Error on valid data: %v", correctProduct.Name)
-		return
 	}
 
 	if failed {
@@ -198,35 +187,35 @@ func TestProduct_ValidateProduct(t *testing.T) {
 }
 
 func TestFoodVenue_ValidateFoodVenue(t *testing.T) {
-	testCases := []FoodVenue{
+	TestCases := []TestCase{
 		{
-			Name:    "",
-			Address: "1234 Main St",
+			Name:           "request FoodVenue failed because of invalid name",
+			ExpectedResult: errors.New("name cannot be empty"),
+			Data: FoodVenue{
+				Name:    "",
+				Address: "1234 Main St",
+			},
 		},
+
 		{
-			Name:    "Burger",
-			Address: "",
+			Name:           "request FoodVenue failed because of invalid address",
+			ExpectedResult: errors.New("address cannot be empty"),
+			Data: FoodVenue{
+				Name:    "Burger",
+				Address: "",
+			},
 		},
 	}
 
 	failed := false
-	for _, fv := range testCases {
-		err := fv.ValidateFoodVenue()
-		if err == nil {
-			t.Errorf("FoodVenue: %v should have failed validation", fv.Name)
+	for _, u := range TestCases {
+		user := u.Data.(FoodVenue)
+		err := user.ValidateFoodVenue()
+		if (err != nil && err.Error() != u.ExpectedResult.Error()) || (err == nil && u.ExpectedResult != nil) {
+			t.Errorf("Test for %v\nShould get error: %v but got: %v", u.Name, err, u.ExpectedResult)
+			log.Printf("Test for %v\nShould get error: %v but got: %v", u.Name, err, u.ExpectedResult)
 			failed = true
 		}
-	}
-
-	correctFoodVenue := FoodVenue{
-		Name:    "Burger",
-		Address: "1234 Main St",
-	}
-
-	err := correctFoodVenue.ValidateFoodVenue()
-	if err != nil {
-		t.Errorf("Error on valid data: %v", correctFoodVenue.Name)
-		return
 	}
 
 	if failed {
