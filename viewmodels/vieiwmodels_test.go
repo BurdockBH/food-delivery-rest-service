@@ -1,13 +1,14 @@
 package viewmodels
 
 import (
+	"errors"
 	"log"
 	"testing"
 	"time"
 )
 
 type testCase struct {
-	ExpectedResult string
+	ExpectedResult error
 	Name           string
 	Data           interface{}
 }
@@ -17,7 +18,7 @@ func TestUser_Validate(t *testing.T) {
 	var testCases = []testCase{
 		{
 			Name:           "request User failed because of invalid name",
-			ExpectedResult: "invalid name",
+			ExpectedResult: errors.New("invalid name"),
 			Data: User{
 				Name:      "Edo123",
 				Email:     "edocicak@gmail.com",
@@ -29,7 +30,7 @@ func TestUser_Validate(t *testing.T) {
 		},
 		{
 			Name:           "request User failed because of invalid email",
-			ExpectedResult: "invalid email",
+			ExpectedResult: errors.New("invalid email"),
 			Data: User{
 				Name:      "Burdock",
 				Email:     "edocicakgmail.com",
@@ -40,9 +41,10 @@ func TestUser_Validate(t *testing.T) {
 			},
 		},
 		{
-			Name:           "request User failed because of invalid phone",
-			ExpectedResult: "invalid phone",
+			Name:           "request User failed because of invalid password",
+			ExpectedResult: errors.New("invalid password"),
 			Data: User{
+				Name:      "Burdock",
 				Email:     "edocicak@gmail.com",
 				Password:  "pass",
 				Phone:     "1234567890",
@@ -51,12 +53,25 @@ func TestUser_Validate(t *testing.T) {
 			},
 		},
 		{
-			Name:           "request User failed because of invalid password",
-			ExpectedResult: "invalid password",
+			Name:           "request User failed because of invalid phone",
+			ExpectedResult: errors.New("invalid phone"),
 			Data: User{
+				Name:      "Burdock",
 				Email:     "edocicak@gmail.com",
 				Password:  "password",
 				Phone:     "1234567abcd",
+				CreatedAt: time.Now().Unix(),
+				UpdatedAt: time.Now().Unix(),
+			},
+		},
+		{
+			Name:           "all data is valid, should return nil",
+			ExpectedResult: nil,
+			Data: User{
+				Name:      "Burdock",
+				Email:     "edocicak@gmail.com",
+				Password:  "password",
+				Phone:     "1234567890",
 				CreatedAt: time.Now().Unix(),
 				UpdatedAt: time.Now().Unix(),
 			},
@@ -67,26 +82,15 @@ func TestUser_Validate(t *testing.T) {
 	for _, u := range testCases {
 		user := u.Data.(User)
 		err := user.Validate()
-		if err.Error() != u.ExpectedResult {
-			t.Errorf("%v unexpected error: %v", u.Name, err.Error())
-			log.Printf("%v unexpected error: %v", u.Name, err.Error())
+		if err != nil && err.Error() != u.ExpectedResult.Error() {
+			t.Errorf("Test for %v\nShould get error: %v but got: %v", u.Name, err, u.ExpectedResult)
+			log.Printf("Test for %v\nShould get error: %v but got: %v", u.Name, err, u.ExpectedResult)
+			failed = true
+		} else if err == nil && u.ExpectedResult != nil {
+			t.Errorf("Test for %v\nShould get error: %v but got: %v", u.Name, err, u.ExpectedResult)
+			log.Printf("Test for %v\nShould get error: %v but got: %v", u.Name, err, u.ExpectedResult)
 			failed = true
 		}
-	}
-
-	correctUser := User{
-		Name:      "Burdock",
-		Email:     "edocicak@gmail.com",
-		Password:  "password",
-		Phone:     "1234567890",
-		CreatedAt: time.Now().Unix(),
-		UpdatedAt: time.Now().Unix(),
-	}
-
-	err := correctUser.Validate()
-	if err != nil {
-		t.Errorf("Error on valid data: %v", correctUser.Name)
-		return
 	}
 
 	if failed {
@@ -100,7 +104,7 @@ func TestUserLoginRequest_ValidateLogin(t *testing.T) {
 	testCases := []testCase{
 		{
 			Name:           "request UserLogin failed because of invalid email",
-			ExpectedResult: "invalid email",
+			ExpectedResult: errors.New("invalid email"),
 			Data: UserLoginRequest{
 				Email:    "edocicak.com",
 				Password: "password",
@@ -108,7 +112,7 @@ func TestUserLoginRequest_ValidateLogin(t *testing.T) {
 		},
 		{
 			Name:           "request UserLogin failed because of invalid password",
-			ExpectedResult: "invalid password",
+			ExpectedResult: errors.New("invalid password"),
 			Data: UserLoginRequest{
 				Email:    "edocicak@gmail.com",
 				Password: "passasdofjadsjfoiaj0erjt0j092j9i2",
@@ -120,7 +124,7 @@ func TestUserLoginRequest_ValidateLogin(t *testing.T) {
 	for _, u := range testCases {
 		user := u.Data.(UserLoginRequest)
 		err := user.ValidateLogin()
-		if err.Error() != u.ExpectedResult {
+		if err != u.ExpectedResult {
 			t.Errorf("%v unexpected error: %v", u.Name, err.Error())
 			log.Printf("%v unexpected error: %v", u.Name, err.Error())
 			failed = true
