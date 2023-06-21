@@ -1,0 +1,54 @@
+package food_venue
+
+import (
+	"encoding/json"
+	"github.com/BurdockBH/food-delivery-rest-service/db/food_venue"
+	"github.com/BurdockBH/food-delivery-rest-service/router/helper"
+	"github.com/BurdockBH/food-delivery-rest-service/statusCodes"
+	"github.com/BurdockBH/food-delivery-rest-service/viewmodels"
+	"log"
+	"net/http"
+)
+
+func CreateFoodVenue(w http.ResponseWriter, r *http.Request) {
+	var foodVenue viewmodels.FoodVenue
+	err := json.NewDecoder(r.Body).Decode(&foodVenue)
+	if err != nil {
+		log.Println("Failed to decode request body: ", err)
+		response, _ := json.Marshal(viewmodels.BaseResponse{
+			StatusCode: statusCodes.FailedToDecodeRequestBody,
+			Message:    statusCodes.StatusCodes[statusCodes.FailedToDecodeRequestBody],
+		})
+		helper.BaseResponse(w, response, http.StatusBadRequest)
+		return
+	}
+	defer r.Body.Close()
+
+	err = foodVenue.ValidateFoodVenue()
+	if err != nil {
+		log.Println("Failed to validate request body: ", err)
+		response, _ := json.Marshal(viewmodels.BaseResponse{
+			StatusCode: statusCodes.FailedToValidateFoodVenue,
+			Message:    statusCodes.StatusCodes[statusCodes.FailedToValidateFoodVenue],
+		})
+		helper.BaseResponse(w, response, http.StatusBadRequest)
+		return
+	}
+
+	err = food_venue.CreateFoodVenue(&foodVenue)
+	if err != nil {
+		log.Println("Failed to create food venue: ", err)
+		response, _ := json.Marshal(viewmodels.BaseResponse{
+			StatusCode: statusCodes.FailedToCreateFoodVenue,
+			Message:    statusCodes.StatusCodes[statusCodes.FailedToCreateFoodVenue] + ":" + err.Error(),
+		})
+		helper.BaseResponse(w, response, http.StatusInternalServerError)
+		return
+	}
+
+	response, _ := json.Marshal(viewmodels.BaseResponse{
+		StatusCode: statusCodes.SuccesfullyCreatedFoodVenue,
+		Message:    statusCodes.StatusCodes[statusCodes.SuccesfullyCreatedFoodVenue],
+	})
+	helper.BaseResponse(w, response, http.StatusOK)
+}
