@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"github.com/BurdockBH/food-delivery-rest-service/config"
 	_ "github.com/go-sql-driver/mysql"
+	"github.com/pressly/goose"
 )
 
 var DB *sql.DB
@@ -31,6 +32,16 @@ func Connect(cfg *config.DatabaseConfig) (*sql.DB, error) {
 
 	DB = db
 	return db, nil
+}
+
+func RunMigrations() error {
+	if err := goose.SetDialect("mysql"); err != nil {
+		return err
+	}
+	if err := goose.Up(DB, "migrations"); err != nil {
+		return err
+	}
+	return nil
 }
 
 func ValidateDbConfig(cfg *config.DatabaseConfig) error {
