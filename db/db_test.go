@@ -78,19 +78,14 @@ func TestValidateDbConfig(t *testing.T) {
 		},
 	}
 
-	failed := false
 	for _, u := range TestCases {
 		user := u.Data.(config.DatabaseConfig)
 		err := ValidateDbConfig(&user)
 		if (err != nil && err.Error() != u.ExpectedResult.Error()) || (err == nil && u.ExpectedResult != nil) {
 			t.Errorf("Test for %v\nShould get error: %v but got: %v", u.Name, err, u.ExpectedResult)
 			log.Printf("Test for %v\nShould get error: %v but got: %v", u.Name, err, u.ExpectedResult)
-			failed = true
+			return
 		}
-	}
-
-	if failed {
-		return
 	}
 
 	t.Logf("Validation function is validating correctly")
