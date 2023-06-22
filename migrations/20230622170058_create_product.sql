@@ -17,7 +17,7 @@ BEGIN
     IF venueId IS NULL THEN
         SELECT -1;
     ELSE
-        IF (SELECT id FROM products WHERE Name = name AND food_venue_id = venueId) IS NULL THEN
+        IF (SELECT id FROM products WHERE name = inProductName AND food_venue_id = venueId) IS NULL THEN
             INSERT INTO products (name, description, price, food_venue_id, created_at, updated_at)
             VALUES (inProductName, inProductDescription, inProductPrice, venueId, createdAt, updatedAt);
 
