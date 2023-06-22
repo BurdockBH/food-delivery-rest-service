@@ -48,7 +48,7 @@ func CreateFoodVenue(w http.ResponseWriter, r *http.Request) {
 
 	response, _ := json.Marshal(viewmodels.BaseResponse{
 		StatusCode: statusCodes.SuccesfullyCreatedFoodVenue,
-		Message:    statusCodes.StatusCodes[statusCodes.SuccesfullyCreatedFoodVenue],
+		Message:    statusCodes.StatusCodes[statusCodes.SuccesfullyCreatedFoodVenue] + ":" + foodVenue.Name,
 	})
 	helper.BaseResponse(w, response, http.StatusOK)
 }
@@ -80,7 +80,7 @@ func DeleteFoodVenue(w http.ResponseWriter, r *http.Request) {
 
 	response, _ := json.Marshal(viewmodels.BaseResponse{
 		StatusCode: statusCodes.SuccesfullyDeletedFoodVenue,
-		Message:    statusCodes.StatusCodes[statusCodes.SuccesfullyDeletedFoodVenue],
+		Message:    statusCodes.StatusCodes[statusCodes.SuccesfullyDeletedFoodVenue] + ":" + foodVenue.Name,
 	})
 
 	helper.BaseResponse(w, response, http.StatusOK)

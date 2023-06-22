@@ -48,7 +48,7 @@ func CreateProduct(w http.ResponseWriter, r *http.Request) {
 
 	response, _ := json.Marshal(viewmodels.BaseResponse{
 		StatusCode: statusCodes.SuccesfullyCreatedProduct,
-		Message:    statusCodes.StatusCodes[statusCodes.SuccesfullyCreatedProduct],
+		Message:    statusCodes.StatusCodes[statusCodes.SuccesfullyCreatedProduct] + ":" + p.Name,
 	})
 	helper.BaseResponse(w, response, http.StatusOK)
 
