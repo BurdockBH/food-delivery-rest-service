@@ -2,6 +2,7 @@ package router
 
 import (
 	"github.com/BurdockBH/food-delivery-rest-service/router/middlewares"
+	"github.com/BurdockBH/food-delivery-rest-service/service/food_venue"
 	"github.com/BurdockBH/food-delivery-rest-service/service/user"
 	"net/http"
 )
@@ -16,6 +17,9 @@ func InitializeRouter() *http.ServeMux {
 	router.HandleFunc("/users/delete", middlewares.Chain(middlewares.Delete)(user.DeleteUser))
 	router.HandleFunc("/users/edit", middlewares.Chain(middlewares.Put)(user.EditUser))
 	router.HandleFunc("/users/get", middlewares.Chain(middlewares.Get)(user.GetUsers))
+
+	// Food venue routes
+	router.HandleFunc("/food-venues/create", middlewares.Chain(middlewares.Post)(food_venue.CreateFoodVenue))
 
 	return router
 }

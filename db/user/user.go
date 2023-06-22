@@ -14,7 +14,7 @@ import (
 // Database queries and logic for user
 
 // RegisterUser registers a new user
-func RegisterUser(u viewmodels.User) error {
+func RegisterUser(u *viewmodels.User) error {
 
 	hashedPassword, err := helper.HashPassword(u.Password)
 	if err != nil {
@@ -46,7 +46,7 @@ func RegisterUser(u viewmodels.User) error {
 }
 
 // LoginUser logs in a user, it checks if the user exists and if the password matches
-func LoginUser(u viewmodels.UserLoginRequest) error {
+func LoginUser(u *viewmodels.UserLoginRequest) error {
 
 	query := "CALL LoginUser(?)"
 	var password string
@@ -72,7 +72,7 @@ func LoginUser(u viewmodels.UserLoginRequest) error {
 }
 
 // DeleteUser deletes a user from the database
-func DeleteUser(u viewmodels.UserLoginRequest) error {
+func DeleteUser(u *viewmodels.UserLoginRequest) error {
 	passwordQuery := "CALL LoginUser(?)"
 	var password string
 	err := db.DB.QueryRow(passwordQuery, u.Email).Scan(&password)
@@ -111,7 +111,7 @@ func DeleteUser(u viewmodels.UserLoginRequest) error {
 }
 
 // EditUser edits a user's information
-func EditUser(tokenString string, u viewmodels.User) error {
+func EditUser(tokenString string, u *viewmodels.User) error {
 	// Retrieve user information from the token
 	claims, err := helper.ValidateToken(tokenString)
 	if err != nil {
@@ -151,7 +151,7 @@ func EditUser(tokenString string, u viewmodels.User) error {
 	return nil
 }
 
-func GetUsersByDetails(u viewmodels.User) ([]viewmodels.User, error) {
+func GetUsersByDetails(u *viewmodels.User) ([]viewmodels.User, error) {
 	query := "CALL GetUsersByDetails(?, ?, ?)"
 	st, err := db.DB.Prepare(query)
 	if err != nil {

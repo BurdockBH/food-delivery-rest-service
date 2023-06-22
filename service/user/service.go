@@ -38,7 +38,7 @@ func RegisterUser(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	err = user.RegisterUser(u)
+	err = user.RegisterUser(&u)
 	if err != nil {
 		log.Println("Failed to register user:", err)
 		response, _ := json.Marshal(viewmodels.BaseResponse{
@@ -82,7 +82,7 @@ func LoginUser(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	err = user.LoginUser(userLogin)
+	err = user.LoginUser(&userLogin)
 	if err != nil {
 		log.Println("Failed to login user: ", userLogin.Email, err)
 		response, _ := json.Marshal(viewmodels.BaseResponse{
@@ -194,7 +194,7 @@ func DeleteUser(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	err = user.DeleteUser(userLogin)
+	err = user.DeleteUser(&userLogin)
 	if err != nil {
 		log.Println("Failed to delete user:", err)
 		response, _ := json.Marshal(viewmodels.BaseResponse{
@@ -274,7 +274,7 @@ func EditUser(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	err = user.EditUser(tokenString, u)
+	err = user.EditUser(tokenString, &u)
 	if err != nil {
 		log.Println("Failed to update user:", err)
 		response, _ := json.Marshal(viewmodels.BaseResponse{
@@ -329,7 +329,7 @@ func GetUsers(w http.ResponseWriter, r *http.Request) {
 	}
 	defer r.Body.Close()
 
-	users, err := user.GetUsersByDetails(u)
+	users, err := user.GetUsersByDetails(&u)
 	if err != nil {
 		log.Println("Failed to get user:", err)
 		response, _ := json.Marshal(viewmodels.BaseResponse{
