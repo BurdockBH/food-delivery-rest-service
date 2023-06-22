@@ -1,7 +1,6 @@
 -- +goose Up
 -- +goose StatementBegin
-DELIMITER //
-CREATE DEFINER=`root`@`localhost` PROCEDURE `DeleteUser`(
+CREATE PROCEDURE `DeleteUser`(
     IN inEmail VARCHAR(140)
 )
 BEGIN
@@ -12,13 +11,10 @@ BEGIN
         DELETE FROM users WHERE id = userId AND email = inEmail;
         SELECT 'DELETED';
     END IF;
-END //
-DELIMITER ;
+END
 -- +goose StatementEnd
 
 -- +goose Down
 -- +goose StatementBegin
-DELIMITER //
 DROP PROCEDURE IF EXISTS `DeleteUser`;
-DELIMITER ;
 -- +goose StatementEnd

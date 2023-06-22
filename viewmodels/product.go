@@ -14,9 +14,9 @@ type Product struct {
 
 func (p *Product) ValidateProduct() error {
 	if len(p.Name) < 1 {
-		return errors.New("price cannot be negative")
-	} else if p.Price < 0 {
 		return errors.New("name cannot be empty")
+	} else if p.Price < 0 {
+		return errors.New("price cannot be negative")
 	} else if len(p.Description) < 1 {
 		return errors.New("description cannot be empty")
 	}
