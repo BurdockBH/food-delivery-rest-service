@@ -329,7 +329,7 @@ func GetUsers(w http.ResponseWriter, r *http.Request) {
 	}
 	defer r.Body.Close()
 
-	users, err := user.GetUsersByDetails(&u)
+	users, err := user.GetUsers(&u)
 	if err != nil {
 		log.Println("Failed to get user:", err)
 		response, _ := json.Marshal(viewmodels.BaseResponse{

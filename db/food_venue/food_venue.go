@@ -58,3 +58,38 @@ func DeleteFoodVenue(fv *viewmodels.FoodVenue) error {
 
 	return nil
 }
+
+func GetVenues(fv *viewmodels.FoodVenue) ([]viewmodels.FoodVenue, error) {
+	query := "CALL GetVenues(?, ?)"
+	st, err := db.DB.Prepare(query)
+	if err != nil {
+		log.Printf("Error preparing query: CALL GetVenues(%v, %v): %v", fv.Name, fv.Address, err)
+		return nil, err
+	}
+	defer st.Close()
+
+	rows, err := st.Query(fv.Name, fv.Address)
+	if err != nil {
+		log.Printf("Error executing query: CALL GetVenues(%v, %v): %v", fv.Name, fv.Address, err)
+		return nil, err
+	}
+	defer rows.Close()
+
+	var venues []viewmodels.FoodVenue
+	for rows.Next() {
+		var venue viewmodels.FoodVenue
+		err = rows.Scan(&venue.ID, &venue.Name, &venue.Address, &venue.CreatedAt, &venue.UpdatedAt)
+		if err != nil {
+			log.Printf("Error scanning row: %v", err)
+			return nil, err
+		}
+		venues = append(venues, venue)
+	}
+
+	if venues == nil {
+		log.Printf("No food venues found")
+		return nil, errors.New("no food venues found")
+	}
+
+	return venues, nil
+}

@@ -144,7 +144,7 @@ func EditUser(u *viewmodels.User) error {
 	return nil
 }
 
-func GetUsersByDetails(u *viewmodels.User) ([]viewmodels.User, error) {
+func GetUsers(u *viewmodels.User) ([]viewmodels.User, error) {
 	query := "CALL GetUsersByDetails(?, ?, ?)"
 	st, err := db.DB.Prepare(query)
 	if err != nil {

@@ -85,3 +85,39 @@ func DeleteFoodVenue(w http.ResponseWriter, r *http.Request) {
 
 	helper.BaseResponse(w, response, http.StatusOK)
 }
+
+func GetFoodVenues(w http.ResponseWriter, r *http.Request) {
+	var foodVenue viewmodels.FoodVenue
+	err := json.NewDecoder(r.Body).Decode(&foodVenue)
+	if err != nil {
+		log.Println("Failed to decode request body: ", err)
+		response, _ := json.Marshal(viewmodels.BaseResponse{
+			StatusCode: statusCodes.FailedToDecodeRequestBody,
+			Message:    statusCodes.StatusCodes[statusCodes.FailedToDecodeRequestBody],
+		})
+		helper.BaseResponse(w, response, http.StatusBadRequest)
+		return
+	}
+	defer r.Body.Close()
+
+	foodVenues, err := food_venue.GetVenues(&foodVenue)
+	if err != nil {
+		log.Println("Failed to get food venues: ", err)
+		response, _ := json.Marshal(viewmodels.BaseResponse{
+			StatusCode: statusCodes.FailedToFetchFoodVenues,
+			Message:    statusCodes.StatusCodes[statusCodes.FailedToFetchFoodVenues] + ":" + err.Error(),
+		})
+		helper.BaseResponse(w, response, http.StatusInternalServerError)
+		return
+	}
+
+	response, _ := json.Marshal(viewmodels.FoodVenueList{
+		BaseResponse: viewmodels.BaseResponse{
+			StatusCode: statusCodes.SuccesfullyFetchedFoodVenues,
+			Message:    statusCodes.StatusCodes[statusCodes.SuccesfullyFetchedFoodVenues],
+		},
+		FoodVenues: foodVenues,
+	})
+
+	helper.BaseResponse(w, response, http.StatusOK)
+}
