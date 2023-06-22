@@ -23,8 +23,8 @@ func TestDeleteUser(t *testing.T) {
 	}
 
 	// Gives me user edocicak@gmail.com does not exist
-	mock.ExpectPrepare("CALL DeleteUser").ExpectQuery().WithArgs(
-		loginUser.Email).WillReturnRows(sqlmock.NewRows([]string{"1"}).AddRow(1))
+	mock.ExpectPrepare("CALL DeleteUser").ExpectExec().WithArgs(
+		loginUser.Email).WillReturnResult(sqlmock.NewResult(0, 1))
 
 	err = user.DeleteUser(loginUser)
 	assert.NoError(t, err)

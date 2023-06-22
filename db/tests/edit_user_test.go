@@ -25,7 +25,7 @@ func TestEditUser(t *testing.T) {
 	}
 
 	mock.ExpectPrepare("CALL EditUser").ExpectQuery().WithArgs(
-		registerUser.Name, registerUser.Email, sqlmock.AnyArg(), registerUser.Phone, sqlmock.AnyArg(), sqlmock.AnyArg()).WillReturnRows(sqlmock.NewRows([]string{"1"}).AddRow(1))
+		registerUser.Name, registerUser.Email, sqlmock.AnyArg(), registerUser.Phone, sqlmock.AnyArg()).WillReturnRows(sqlmock.NewRows([]string{"1"}).AddRow(1))
 
 	// Gives me user edocicak@gmail does not exist
 	err = user.EditUser(registerUser)
