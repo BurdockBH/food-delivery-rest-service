@@ -15,7 +15,6 @@ BEGIN
     ELSE
         INSERT INTO users (name, email, password, phone, created_at, updated_at)
         VALUES (inName, inEmail, inHashedPassword, inPhone, inCreatedAt, inUpdatedAt);
-
         SELECT 1;
     END IF;
 END

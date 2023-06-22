@@ -9,7 +9,8 @@ BEGIN
 
     IF userId IS NOT NULL THEN
         DELETE FROM users WHERE id = userId AND email = inEmail;
-        SELECT 'DELETED';
+        SELECT 1;
+    ELSE SELECT 0;
     END IF;
 END
 -- +goose StatementEnd
