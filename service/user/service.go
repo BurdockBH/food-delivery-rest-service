@@ -43,7 +43,7 @@ func RegisterUser(w http.ResponseWriter, r *http.Request) {
 		log.Println("Failed to register user:", err)
 		response, _ := json.Marshal(viewmodels.BaseResponse{
 			StatusCode: statusCodes.FailedToCreateUser,
-			Message:    statusCodes.StatusCodes[statusCodes.FailedToCreateUser],
+			Message:    statusCodes.StatusCodes[statusCodes.FailedToCreateUser] + ": " + err.Error(),
 		})
 		helper.BaseResponse(w, response, http.StatusInternalServerError)
 		return
@@ -274,7 +274,7 @@ func EditUser(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	err = user.EditUser(tokenString, &u)
+	err = user.EditUser(&u)
 	if err != nil {
 		log.Println("Failed to update user:", err)
 		response, _ := json.Marshal(viewmodels.BaseResponse{

@@ -52,3 +52,36 @@ func CreateFoodVenue(w http.ResponseWriter, r *http.Request) {
 	})
 	helper.BaseResponse(w, response, http.StatusOK)
 }
+
+func DeleteFoodVenue(w http.ResponseWriter, r *http.Request) {
+	var foodVenue viewmodels.FoodVenue
+	err := json.NewDecoder(r.Body).Decode(&foodVenue)
+	if err != nil {
+		log.Println("Failed to decode request body: ", err)
+		response, _ := json.Marshal(viewmodels.BaseResponse{
+			StatusCode: statusCodes.FailedToDecodeRequestBody,
+			Message:    statusCodes.StatusCodes[statusCodes.FailedToDecodeRequestBody],
+		})
+		helper.BaseResponse(w, response, http.StatusBadRequest)
+		return
+	}
+	defer r.Body.Close()
+
+	err = food_venue.DeleteFoodVenue(&foodVenue)
+	if err != nil {
+		log.Println("Failed to delete food venue: ", err)
+		response, _ := json.Marshal(viewmodels.BaseResponse{
+			StatusCode: statusCodes.FailedToDeleteFoodVenue,
+			Message:    statusCodes.StatusCodes[statusCodes.FailedToDeleteFoodVenue] + ":" + err.Error(),
+		})
+		helper.BaseResponse(w, response, http.StatusInternalServerError)
+		return
+	}
+
+	response, _ := json.Marshal(viewmodels.BaseResponse{
+		StatusCode: statusCodes.SuccesfullyDeletedFoodVenue,
+		Message:    statusCodes.StatusCodes[statusCodes.SuccesfullyDeletedFoodVenue],
+	})
+
+	helper.BaseResponse(w, response, http.StatusOK)
+}

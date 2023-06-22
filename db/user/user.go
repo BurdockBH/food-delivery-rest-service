@@ -111,14 +111,7 @@ func DeleteUser(u *viewmodels.UserLoginRequest) error {
 }
 
 // EditUser edits a user's information
-func EditUser(tokenString string, u *viewmodels.User) error {
-	// Retrieve user information from the token
-	claims, err := helper.ValidateToken(tokenString)
-	if err != nil {
-		log.Println("Token validation failed:", err)
-		return errors.New("token validation failed")
-	}
-
+func EditUser(u *viewmodels.User) error {
 	query := "CALL EditUser(?, ?, ?, ?, ?)"
 
 	st, err := db.DB.Prepare(query)
@@ -136,7 +129,7 @@ func EditUser(tokenString string, u *viewmodels.User) error {
 	var updated int
 	err = st.QueryRow(u.Name, u.Email, hashedPassword, u.Phone, time.Now().Unix()).Scan(&updated)
 	if err != nil {
-		log.Printf("Failed to update user with email %v. Error: %v\n\n\n", claims["email"].(string), err)
+		log.Printf("Failed to update user with email %v. Error: %v\n\n\n", u.Email, err)
 		return err
 	}
 

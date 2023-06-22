@@ -24,6 +24,8 @@ const (
 	FailedToValidateFoodVenue   = 21
 	SuccesfullyCreatedFoodVenue = 22
 	FailedToCreateFoodVenue     = 23
+	FailedToDeleteFoodVenue     = 24
+	SuccesfullyDeletedFoodVenue = 25
 )
 
 var StatusCodes = map[int64]string{
@@ -50,4 +52,6 @@ var StatusCodes = map[int64]string{
 	FailedToValidateFoodVenue:   "Failed to validate food venue",
 	SuccesfullyCreatedFoodVenue: "Food venue created successfully!",
 	FailedToCreateFoodVenue:     "Failed to create food venue",
+	FailedToDeleteFoodVenue:     "Failed to delete food venue",
+	SuccesfullyDeletedFoodVenue: "Food venue deleted successfully!",
 }
