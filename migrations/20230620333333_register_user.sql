@@ -9,7 +9,6 @@ CREATE PROCEDURE `RegisterUser`(
     IN inUpdatedAt bigint
 )
 BEGIN
-
     IF (SELECT COUNT(*) FROM users WHERE email = inEmail) OR (SELECT COUNT(*) FROM users WHERE phone = inPhone) > 0 THEN
         SELECT 0;
     ELSE

@@ -9,6 +9,7 @@ CREATE PROCEDURE `EditUser`(
 )
 BEGIN
     DECLARE userId INT;
+
     SELECT id INTO userId FROM users WHERE email = inEmail;
 
     IF userId IS NULL THEN
