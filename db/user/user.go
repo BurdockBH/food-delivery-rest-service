@@ -58,7 +58,10 @@ func LoginUser(u *viewmodels.UserLoginRequest) error {
 	}
 
 	err = st.QueryRow(u.Email).Scan(&password)
-	if err != nil {
+	if err != nil && err.Error() == "sql: no rows in result set" {
+		log.Printf("User with email %v does not exist", u.Email)
+		return errors.New(fmt.Sprintf("user with email %v does not exist", u.Email))
+	} else if err != nil { // other error
 		log.Println("Error executing query:", err)
 		return err
 	}

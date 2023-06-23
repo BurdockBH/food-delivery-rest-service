@@ -16,7 +16,6 @@ func TestGetUsers_Success(t *testing.T) {
 	defer db2.Close()
 
 	db.DB = db2
-	defer func() { db2 = db.DB }()
 
 	u := &viewmodels.User{
 		Name:     "John Doe",
@@ -38,7 +37,6 @@ func TestGetUsers_Fail(t *testing.T) {
 	defer db2.Close()
 
 	db.DB = db2
-	defer func() { db2 = db.DB }()
 
 	u := &viewmodels.User{
 		Name:     "John Doe",
@@ -62,7 +60,6 @@ func TestGetUsers_ArgumentError(t *testing.T) {
 	defer db2.Close()
 
 	db.DB = db2
-	defer func() { db2 = db.DB }()
 
 	u := &viewmodels.User{
 		Name:     "John Doe",
@@ -85,7 +82,6 @@ func TestGetUsers_PrepareExec(t *testing.T) {
 	defer db2.Close()
 
 	db.DB = db2
-	defer func() { db2 = db.DB }()
 
 	testData := []struct {
 		err    error

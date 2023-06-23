@@ -16,7 +16,6 @@ func TestEditUser(t *testing.T) {
 	defer db2.Close()
 
 	db.DB = db2
-	defer func() { db2 = db.DB }()
 
 	registerUser := &viewmodels.User{
 		Name:     "John Doe",
@@ -39,7 +38,6 @@ func TestEditUser_Fail(t *testing.T) {
 	defer db2.Close()
 
 	db.DB = db2
-	defer func() { db2 = db.DB }()
 
 	u := &viewmodels.User{
 		Name:     "John Doe",
@@ -67,7 +65,6 @@ func TestEditUser_PrepareExec(t *testing.T) {
 	defer db2.Close()
 
 	db.DB = db2
-	defer func() { db2 = db.DB }()
 
 	testData := []struct {
 		err    error

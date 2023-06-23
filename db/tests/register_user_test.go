@@ -16,7 +16,6 @@ func TestRegisterUser_Success(t *testing.T) {
 	defer db2.Close()
 
 	db.DB = db2
-	defer func() { db2 = db.DB }()
 
 	u := &viewmodels.User{
 		Name:     "John Doe",
@@ -40,7 +39,6 @@ func TestRegisterUser_UserExists(t *testing.T) {
 	defer db2.Close()
 
 	db.DB = db2
-	defer func() { db2 = db.DB }()
 
 	u := &viewmodels.User{
 		Name:     "John Doe",
@@ -64,7 +62,6 @@ func TestRegisterUser_ArgumentsError(t *testing.T) {
 	defer db2.Close()
 
 	db.DB = db2
-	defer func() { db2 = db.DB }()
 
 	u := &viewmodels.User{
 		Name:     "John Doe",
@@ -87,7 +84,6 @@ func TestRegisterUser_PrepareExec(t *testing.T) {
 	defer db2.Close()
 
 	db.DB = db2
-	defer func() { db2 = db.DB }()
 
 	testData := []struct {
 		err    error

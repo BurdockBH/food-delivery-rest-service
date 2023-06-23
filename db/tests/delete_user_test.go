@@ -17,7 +17,6 @@ func TestDeleteUse_Success(t *testing.T) {
 	defer db2.Close()
 
 	db.DB = db2
-	defer func() { db2 = db.DB }()
 
 	loginUser := &viewmodels.UserLoginRequest{
 		Email:    "edocicak@gmail.com",
@@ -51,7 +50,6 @@ func TestDeleteUser_NoUser(t *testing.T) {
 	defer db2.Close()
 
 	db.DB = db2
-	defer func() { db2 = db.DB }()
 
 	loginUser := &viewmodels.UserLoginRequest{
 		Email:    "edocicak@gmail.com",
@@ -85,7 +83,6 @@ func TestDeleteUser_ArgumentsError(t *testing.T) {
 	defer db2.Close()
 
 	db.DB = db2
-	defer func() { db2 = db.DB }()
 
 	u := &viewmodels.UserLoginRequest{
 		Email:    "edocicak@gmail.com",
@@ -115,7 +112,6 @@ func TestDeleteUser_PrepareExec(t *testing.T) {
 	defer db2.Close()
 
 	db.DB = db2
-	defer func() { db2 = db.DB }()
 
 	u := &viewmodels.UserLoginRequest{
 		Email:    "edocicak@gmail.com",

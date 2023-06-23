@@ -17,7 +17,6 @@ func TestLoginUser_Success(t *testing.T) {
 	defer db2.Close()
 
 	db.DB = db2
-	defer func() { db2 = db.DB }()
 
 	loginUser := &viewmodels.UserLoginRequest{
 		Email:    "edocicak@gmail.com",
@@ -40,7 +39,6 @@ func TestLoginUser_NoUser(t *testing.T) {
 	defer db2.Close()
 
 	db.DB = db2
-	defer func() { db2 = db.DB }()
 
 	loginUser := &viewmodels.UserLoginRequest{
 		Email:    "edocicak@gmail.com",
@@ -51,7 +49,7 @@ func TestLoginUser_NoUser(t *testing.T) {
 		loginUser.Email).WillReturnRows(sqlmock.NewRows([]string{"0"}))
 
 	err = user.LoginUser(loginUser)
-	assert.EqualError(t, err, "user edocicak@gmail.com does not exist")
+	assert.EqualError(t, err, "user with email edocicak@gmail.com does not exist")
 }
 
 func TestLoginUser_ArgumentsError(t *testing.T) {
@@ -60,7 +58,6 @@ func TestLoginUser_ArgumentsError(t *testing.T) {
 	defer db2.Close()
 
 	db.DB = db2
-	defer func() { db2 = db.DB }()
 
 	u := &viewmodels.UserLoginRequest{
 		Email:    "edocicak@gmail.com",
@@ -82,7 +79,6 @@ func TestLoginUser_PrepareExec(t *testing.T) {
 	defer db2.Close()
 
 	db.DB = db2
-	defer func() { db2 = db.DB }()
 
 	testData := []struct {
 		err    error
