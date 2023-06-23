@@ -73,3 +73,12 @@ func BaseResponse(w http.ResponseWriter, response []byte, statusCode int) {
 		http.Error(w, "Error writing response", http.StatusInternalServerError)
 	}
 }
+
+//func MockDb(t *testing.T) (sqlmock.Sqlmock, error) {
+//	db2, mock, err := sqlmock.New()
+//	assert.NoError(t, err)
+//	defer db2.Close()
+//	db.DB = db2
+//
+//	return mock, err
+//}

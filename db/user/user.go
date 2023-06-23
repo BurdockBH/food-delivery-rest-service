@@ -58,9 +58,12 @@ func LoginUser(u *viewmodels.UserLoginRequest) error {
 	}
 
 	err = st.QueryRow(u.Email).Scan(&password)
-	if err != nil {
-		log.Println("User does not exist:", err)
-		return errors.New(fmt.Sprintf("user %v does not exist", u.Email))
+	if err != nil && err.Error() == "sql: no rows in result set" {
+		log.Printf("User with email %v does not exist", u.Email)
+		return errors.New(fmt.Sprintf("user with email %v does not exist", u.Email))
+	} else if err != nil { // other error
+		log.Println("Error executing query:", err)
+		return err
 	}
 
 	err = bcrypt.CompareHashAndPassword([]byte(password), []byte(u.Password))
@@ -111,14 +114,7 @@ func DeleteUser(u *viewmodels.UserLoginRequest) error {
 }
 
 // EditUser edits a user's information
-func EditUser(tokenString string, u *viewmodels.User) error {
-	// Retrieve user information from the token
-	claims, err := helper.ValidateToken(tokenString)
-	if err != nil {
-		log.Println("Token validation failed:", err)
-		return errors.New("token validation failed")
-	}
-
+func EditUser(u *viewmodels.User) error {
 	query := "CALL EditUser(?, ?, ?, ?, ?)"
 
 	st, err := db.DB.Prepare(query)
@@ -136,7 +132,7 @@ func EditUser(tokenString string, u *viewmodels.User) error {
 	var updated int
 	err = st.QueryRow(u.Name, u.Email, hashedPassword, u.Phone, time.Now().Unix()).Scan(&updated)
 	if err != nil {
-		log.Printf("Failed to update user with email %v. Error: %v\n\n\n", claims["email"].(string), err)
+		log.Printf("Failed to update user with email %v. Error: %v\n\n\n", u.Email, err)
 		return err
 	}
 
@@ -151,19 +147,19 @@ func EditUser(tokenString string, u *viewmodels.User) error {
 	return nil
 }
 
-func GetUsersByDetails(u *viewmodels.User) ([]viewmodels.User, error) {
+func GetUsers(u *viewmodels.User) ([]viewmodels.User, error) {
 	query := "CALL GetUsersByDetails(?, ?, ?)"
 	st, err := db.DB.Prepare(query)
 	if err != nil {
 		log.Printf(`Error preparing query "CALL GetUsersByDetails(%v, %v, %v)": %v`, u.Name, u.Email, u.Phone, err)
-		return nil, errors.New("error preparing query")
+		return nil, err
 	}
 	defer st.Close()
 
 	rows, err := st.Query(u.Name, u.Email, u.Phone)
 	if err != nil {
 		log.Println("Error executing query:", err)
-		return nil, errors.New("error executing query")
+		return nil, err
 	}
 	defer rows.Close()
 

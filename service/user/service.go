@@ -43,7 +43,7 @@ func RegisterUser(w http.ResponseWriter, r *http.Request) {
 		log.Println("Failed to register user:", err)
 		response, _ := json.Marshal(viewmodels.BaseResponse{
 			StatusCode: statusCodes.FailedToCreateUser,
-			Message:    statusCodes.StatusCodes[statusCodes.FailedToCreateUser],
+			Message:    statusCodes.StatusCodes[statusCodes.FailedToCreateUser] + ": " + err.Error(),
 		})
 		helper.BaseResponse(w, response, http.StatusInternalServerError)
 		return
@@ -51,7 +51,7 @@ func RegisterUser(w http.ResponseWriter, r *http.Request) {
 
 	response, _ := json.Marshal(viewmodels.BaseResponse{
 		StatusCode: statusCodes.SuccesfullyCreatedUser,
-		Message:    statusCodes.StatusCodes[statusCodes.SuccesfullyCreatedUser],
+		Message:    statusCodes.StatusCodes[statusCodes.SuccesfullyCreatedUser] + ": " + u.Email,
 	})
 	helper.BaseResponse(w, response, http.StatusOK)
 }
@@ -106,7 +106,7 @@ func LoginUser(w http.ResponseWriter, r *http.Request) {
 
 	jsonResponse, err := json.Marshal(viewmodels.LoginResponse{AccessToken: token, BaseResponse: viewmodels.BaseResponse{
 		StatusCode: statusCodes.SuccesfullyLoggedInUser,
-		Message:    statusCodes.StatusCodes[statusCodes.SuccesfullyLoggedInUser],
+		Message:    statusCodes.StatusCodes[statusCodes.SuccesfullyLoggedInUser] + ":" + userLogin.Email,
 	}})
 	if err != nil {
 		log.Println("Failed to marshal json:", err)
@@ -118,19 +118,7 @@ func LoginUser(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(http.StatusOK)
-	log.Println("User logged in successfully!")
-	_, err = w.Write(jsonResponse)
-	if err != nil {
-		log.Println("Failed to write response:", err)
-		response, _ := json.Marshal(viewmodels.BaseResponse{
-			StatusCode: statusCodes.FailedToWriteResponse,
-			Message:    statusCodes.StatusCodes[statusCodes.FailedToWriteResponse] + ":" + err.Error(),
-		})
-		helper.BaseResponse(w, response, http.StatusInternalServerError)
-		return
-	}
+	helper.BaseResponse(w, jsonResponse, http.StatusOK)
 }
 
 // DeleteUser deletes a user from the database
@@ -208,7 +196,7 @@ func DeleteUser(w http.ResponseWriter, r *http.Request) {
 	log.Printf("User %v deleted successfully!\n", userLogin.Email)
 	response, _ := json.Marshal(viewmodels.BaseResponse{
 		StatusCode: statusCodes.SuccesfullyDeletedUser,
-		Message:    statusCodes.StatusCodes[statusCodes.SuccesfullyDeletedUser],
+		Message:    statusCodes.StatusCodes[statusCodes.SuccesfullyDeletedUser] + ":" + userLogin.Email,
 	})
 	helper.BaseResponse(w, response, http.StatusOK)
 }
@@ -274,7 +262,7 @@ func EditUser(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	err = user.EditUser(tokenString, &u)
+	err = user.EditUser(&u)
 	if err != nil {
 		log.Println("Failed to update user:", err)
 		response, _ := json.Marshal(viewmodels.BaseResponse{
@@ -298,7 +286,7 @@ func EditUser(w http.ResponseWriter, r *http.Request) {
 
 	jsonResponse, err := json.Marshal(viewmodels.LoginResponse{AccessToken: token, BaseResponse: viewmodels.BaseResponse{
 		StatusCode: statusCodes.SuccesfullyUpdatedUser,
-		Message:    statusCodes.StatusCodes[statusCodes.SuccesfullyUpdatedUser],
+		Message:    statusCodes.StatusCodes[statusCodes.SuccesfullyUpdatedUser] + ":" + u.Email,
 	}})
 	if err != nil {
 		log.Println("Failed to marshal json:", err)
@@ -329,7 +317,7 @@ func GetUsers(w http.ResponseWriter, r *http.Request) {
 	}
 	defer r.Body.Close()
 
-	users, err := user.GetUsersByDetails(&u)
+	users, err := user.GetUsers(&u)
 	if err != nil {
 		log.Println("Failed to get user:", err)
 		response, _ := json.Marshal(viewmodels.BaseResponse{
