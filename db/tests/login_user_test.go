@@ -54,6 +54,28 @@ func TestLoginUser_NoUser(t *testing.T) {
 	assert.EqualError(t, err, "user edocicak@gmail.com does not exist")
 }
 
+func TestLoginUser_ArgumentsError(t *testing.T) {
+	db2, mock, err := sqlmock.New()
+	assert.NoError(t, err)
+	defer db2.Close()
+
+	db.DB = db2
+	defer func() { db2 = db.DB }()
+
+	u := &viewmodels.UserLoginRequest{
+		Email:    "edocicak@gmail.com",
+		Password: "password123",
+	}
+
+	mock.ExpectPrepare("CALL LoginUser").ExpectQuery().WithArgs(
+		u.Email).WillReturnError(fmt.Errorf("Query 'CALL LoginUser(?)', arguments do not match: expected 1, but got 2 arguments"))
+
+	err = user.LoginUser(u)
+
+	assert.Error(t, err)
+	assert.EqualError(t, err, "Query 'CALL LoginUser(?)', arguments do not match: expected 1, but got 2 arguments")
+}
+
 func TestLoginUser_PrepareExec(t *testing.T) {
 	db2, mock, err := sqlmock.New()
 	assert.NoError(t, err)
