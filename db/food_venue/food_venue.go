@@ -19,16 +19,21 @@ func CreateFoodVenue(fv *viewmodels.FoodVenue) error {
 	}
 	defer st.Close()
 
-	var created int
-	err = st.QueryRow(fv.Name, fv.Address, time.Now().Unix(), time.Now().Unix()).Scan(&created)
+	rows, err := st.Exec(fv.Name, fv.Address, time.Now().Unix(), time.Now().Unix())
 	if err != nil {
 		log.Printf("Error executing query: CALL CreateFoodVenue(%v, %v): %v", fv.Name, fv.Address, err)
 		return err
 	}
 
-	if created == 0 {
-		log.Printf("Food venue with name %v and address %v already exists", fv.Name, fv.Address)
-		return errors.New(fmt.Sprintf("Food venue with name: %v and address %v already exists", fv.Name, fv.Address))
+	rowsAffected, err := rows.RowsAffected()
+	if err != nil {
+		log.Printf("Error getting rows affected: %v", err)
+		return err
+	}
+
+	if rowsAffected == 0 {
+		log.Printf("errror with rows affected: %v", err)
+		return errors.New(fmt.Sprintf("error with rows affected: %v", err))
 	}
 
 	return nil
