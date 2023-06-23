@@ -59,8 +59,8 @@ func LoginUser(u *viewmodels.UserLoginRequest) error {
 
 	err = st.QueryRow(u.Email).Scan(&password)
 	if err != nil {
-		log.Println("User does not exist:", err)
-		return errors.New(fmt.Sprintf("user %v does not exist", u.Email))
+		log.Println("Error executing query:", err)
+		return err
 	}
 
 	err = bcrypt.CompareHashAndPassword([]byte(password), []byte(u.Password))
@@ -149,14 +149,14 @@ func GetUsers(u *viewmodels.User) ([]viewmodels.User, error) {
 	st, err := db.DB.Prepare(query)
 	if err != nil {
 		log.Printf(`Error preparing query "CALL GetUsersByDetails(%v, %v, %v)": %v`, u.Name, u.Email, u.Phone, err)
-		return nil, errors.New("error preparing query")
+		return nil, err
 	}
 	defer st.Close()
 
 	rows, err := st.Query(u.Name, u.Email, u.Phone)
 	if err != nil {
 		log.Println("Error executing query:", err)
-		return nil, errors.New("error executing query")
+		return nil, err
 	}
 	defer rows.Close()
 

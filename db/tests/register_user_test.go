@@ -80,3 +80,48 @@ func TestRegisterUser_ArgumentsError(t *testing.T) {
 	assert.Error(t, err)
 	assert.EqualError(t, err, "Query 'CALL RegisterUser(?, ?, ?, ?, ?, ?)', arguments do not match: expected 5, but got 6 arguments")
 }
+
+func TestRegisterUser_PrepareExec(t *testing.T) {
+	db2, mock, err := sqlmock.New()
+	assert.NoError(t, err)
+	defer db2.Close()
+
+	db.DB = db2
+	defer func() { db2 = db.DB }()
+
+	testData := []struct {
+		err    error
+		mockFn func(err error)
+	}{
+		{
+			err: fmt.Errorf("preparation error"),
+			mockFn: func(err error) {
+				mock.ExpectPrepare("CALL RegisterUser").
+					WillReturnError(err)
+			},
+		},
+		{
+			err: fmt.Errorf("execution error"),
+			mockFn: func(err error) {
+				mock.ExpectPrepare("CALL RegisterUser").ExpectQuery().
+					WithArgs(sqlmock.AnyArg(), sqlmock.AnyArg(), sqlmock.AnyArg(), sqlmock.AnyArg(), sqlmock.AnyArg(), sqlmock.AnyArg()).
+					WillReturnError(err)
+			},
+		},
+	}
+
+	u := &viewmodels.User{
+		Name:     "John Doe",
+		Email:    "edocicak@gmail.com",
+		Password: "password123",
+		Phone:    "1234567890",
+	}
+
+	for _, data := range testData {
+		data.mockFn(data.err)
+		err = user.RegisterUser(u)
+		assert.NotNil(t, err, "expected error to not be nil, got %v", err)
+		assert.Equal(t, data.err, err, "expected error to be %v, got %v", data.err, err)
+		assert.Nil(t, mock.ExpectationsWereMet(), "expected all expectations to be met, got %v", mock.ExpectationsWereMet())
+	}
+}
