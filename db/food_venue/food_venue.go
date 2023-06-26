@@ -40,24 +40,24 @@ func CreateFoodVenue(fv *viewmodels.FoodVenue, email string) error {
 
 func DeleteFoodVenue(fv *viewmodels.FoodVenue) error {
 	var deleted int
-	query := "CALL DeleteFoodVenue(?, ?, ?)"
+	query := "CALL DeleteFoodVenue(?)"
 
 	st, err := db.DB.Prepare(query)
 	if err != nil {
-		log.Printf("Error preparing query: CALL DeleteFoodVenue(%v, %v, %v): %v", fv.ID, fv.Name, fv.Address, err)
+		log.Printf("Error preparing query: CALL DeleteFoodVenue(%v): %v", fv.ID, err)
 		return err
 	}
 	defer st.Close()
 
-	err = st.QueryRow(fv.ID, fv.Name, fv.Address).Scan(&deleted)
+	err = st.QueryRow(fv.ID).Scan(&deleted)
 	if err != nil {
-		log.Printf("Error executing query: CALL DeleteFoodVenue(%v, %v, %v): %v", fv.ID, fv.Name, fv.Address, err)
+		log.Printf("Error executing query: CALL DeleteFoodVenue(%v): %v", fv.ID, err)
 		return err
 	}
 
 	if deleted == 0 {
-		log.Printf("Food venue with name %v and address %v or id %v does not exist", fv.Name, fv.Address, fv.ID)
-		return errors.New(fmt.Sprintf("Food venue with name %v and address %v or id %v does not exist", fv.Name, fv.Address, fv.ID))
+		log.Printf("Food venue with id %v does not exist", fv.ID)
+		return errors.New(fmt.Sprintf("Food venue with id %v does not exist", fv.ID))
 	}
 
 	return nil
