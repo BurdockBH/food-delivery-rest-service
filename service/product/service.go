@@ -24,6 +24,9 @@ func CreateProduct(w http.ResponseWriter, r *http.Request) {
 	}
 	defer r.Body.Close()
 
+	claims := *helper.CheckToken(&w, r)
+	email := claims["email"].(string)
+
 	err = p.ValidateProduct()
 	if err != nil {
 		log.Println("Failed to validate request body: ", err)
@@ -35,7 +38,7 @@ func CreateProduct(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	err = product.CreateProduct(&p)
+	err = product.CreateProduct(&p, email)
 	if err != nil {
 		log.Println("Failed to create product: ", err)
 		response, _ := json.Marshal(viewmodels.BaseResponse{
@@ -50,6 +53,6 @@ func CreateProduct(w http.ResponseWriter, r *http.Request) {
 		StatusCode: statusCodes.SuccesfullyCreatedProduct,
 		Message:    statusCodes.StatusCodes[statusCodes.SuccesfullyCreatedProduct] + ":" + p.Name,
 	})
+	log.Printf("Product %s created successfully", p.Name)
 	helper.BaseResponse(w, response, http.StatusOK)
-
 }

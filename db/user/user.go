@@ -22,16 +22,16 @@ func RegisterUser(u *viewmodels.User) error {
 		return err
 	}
 
-	query := "CALL RegisterUser(?, ?, ?, ?, ?, ?)"
+	query := "CALL RegisterUser(?, ?, ?, ?)"
 	st, err := db.DB.Prepare(query)
 	if err != nil {
-		log.Printf(`Error preparing query "CALL RegisterUser(%v, %v, %v, %v, %v, %v): %v"`, u.Name, u.Email, hashedPassword, u.Phone, time.Now().Unix(), time.Now().Unix(), err)
+		log.Printf(`Error preparing query "CALL RegisterUser(%v, %v, %v, %v): %v"`, u.Name, u.Email, hashedPassword, u.Phone, err)
 		return err
 	}
 	defer st.Close()
 
 	var created int
-	err = st.QueryRow(u.Name, u.Email, hashedPassword, u.Phone, time.Now().Unix(), time.Now().Unix()).Scan(&created)
+	err = st.QueryRow(u.Name, u.Email, hashedPassword, u.Phone).Scan(&created)
 	if err != nil {
 		log.Println("Error executing query:", err)
 		return err
