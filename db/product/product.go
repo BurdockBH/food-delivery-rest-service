@@ -38,7 +38,7 @@ func CreateProduct(product *viewmodels.Product, email string) error {
 }
 
 func DeleteProduct(product *viewmodels.Product) error {
-	query := "CALL DeleteProduct(?, ?, ?)"
+	query := "CALL DeleteProduct(?)"
 	st, err := db.DB.Prepare(query)
 	if err != nil {
 		log.Printf("Error preparing query: CALL DeleteProduct(%v, %v): %v", product.Name, product.FoodVenue.Name, err)
@@ -47,44 +47,39 @@ func DeleteProduct(product *viewmodels.Product) error {
 	defer st.Close()
 
 	var deleted int
-	err = st.QueryRow(product.Name, product.FoodVenue.Name, product.FoodVenue.Address).Scan(&deleted)
+	err = st.QueryRow(product.ID).Scan(&deleted)
 	if err != nil {
-		log.Printf("Error executing query: CALL DeleteProduct(%v, %v): %v", product.Name, product.FoodVenue.Name, err)
+		log.Printf("Error executing query: CALL DeleteProduct(%v): %v", product.ID, err)
 		return err
 	}
 
 	if deleted == 0 {
-		log.Printf("Product with name %v does not exist in venue %v on address %v", product.Name, product.FoodVenue.Name, product.FoodVenue.Address)
-		return errors.New(fmt.Sprintf("Product with name %v does not exist in venue %v on address %v", product.Name, product.FoodVenue.Name, product.FoodVenue.Address))
+		log.Printf("Product with id %v does not exist", product.ID)
+		return errors.New(fmt.Sprintf("Product with id %v does not exist", product.ID))
 	}
 
 	return nil
 }
 
 func EditProduct(product *viewmodels.Product) error {
-	query := "CALL EditProduct(?, ?, ?, ?, ?)"
+	query := "CALL EditProduct(?, ?, ?, ?)"
 	st, err := db.DB.Prepare(query)
 	if err != nil {
-		log.Printf("Error preparing query: CALL EditProduct(%v, %v, %v, %v, %v): %v", product.Name, product.Description, product.Price, product.FoodVenue.Name, product.FoodVenue.Address, err)
+		log.Printf("Error preparing query: CALL EditProduct(%v, %v, %v, %v): %v", product.ID, product.Name, product.Description, product.Price, err)
 		return err
 	}
 	defer st.Close()
 
 	var edited int
-	err = st.QueryRow(product.Name, product.Description, product.Price, product.FoodVenue.Name, product.FoodVenue.Address).Scan(&edited)
+	err = st.QueryRow(product.ID, product.Name, product.Description, product.Price).Scan(&edited)
 	if err != nil {
-		log.Printf("Error executing query: CALL EditProduct(%v, %v, %v, %v, %v): %v", product.Name, product.Description, product.Price, product.FoodVenue.Name, product.FoodVenue.Address, err)
+		log.Printf("Error executing query: CALL EditProduct(%v, %v, %v, %v): %v", product.ID, product.Name, product.Description, product.Price, err)
 		return err
 	}
 
-	if edited == -1 {
-		log.Printf("There is no venue with name %v and address %v", product.FoodVenue.Name, product.FoodVenue.Address)
-		return errors.New(fmt.Sprintf("there is no venue with name %v and address %v", product.FoodVenue.Name, product.FoodVenue.Address))
-	}
-
 	if edited == 0 {
-		log.Printf("Product with name %v does not exist in venue %v on address %v", product.Name, product.FoodVenue.Name, product.FoodVenue.Address)
-		return errors.New(fmt.Sprintf("Product with name %v does not exist in venue %v on address %v", product.Name, product.FoodVenue.Name, product.FoodVenue.Address))
+		log.Printf("Product with id %v does not exist", product.ID)
+		return errors.New(fmt.Sprintf("Product with id %v does not exist", product.ID))
 	}
 
 	return nil
