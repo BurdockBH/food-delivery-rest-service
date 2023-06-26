@@ -6,22 +6,21 @@ import (
 	"github.com/BurdockBH/food-delivery-rest-service/db"
 	"github.com/BurdockBH/food-delivery-rest-service/viewmodels"
 	"log"
-	"time"
 )
 
-func CreateProduct(product *viewmodels.Product) error {
-	query := "CALL CreateProduct(?, ?, ?, ?, ? ,?, ?)"
+func CreateProduct(product *viewmodels.Product, email string) error {
+	query := "CALL CreateProduct(?, ?, ?, ?, ? ,?)"
 	st, err := db.DB.Prepare(query)
 	if err != nil {
-		log.Printf("Error preparing query: CALL CreateProduct(%v, %v, %v, %v, %v, %v, %v): %v", product.Name, product.Description, product.Price, product.FoodVenue.Name, product.FoodVenue.Address, time.Now().Unix(), time.Now().Unix(), err)
+		log.Printf("Error preparing query: CALL CreateProduct(%v, %v, %v, %v, %v, %v, %v): %v", product.Name, product.Description, product.Price, product.FoodVenue.Name, product.FoodVenue.Address, email, err)
 		return err
 	}
 	defer st.Close()
 
 	var created int
-	err = st.QueryRow(product.Name, product.Description, product.Price, product.FoodVenue.Name, product.FoodVenue.Address, time.Now().Unix(), time.Now().Unix()).Scan(&created)
+	err = st.QueryRow(product.Name, product.Description, product.Price, product.FoodVenue.Name, product.FoodVenue.Address, email).Scan(&created)
 	if err != nil {
-		log.Printf("Error executing query: CALL CreateProduct(%v, %v, %v, %v, %v, %v, %v): %v", product.Name, product.Description, product.Price, product.FoodVenue.Name, product.FoodVenue.Address, time.Now().Unix(), time.Now().Unix(), err)
+		log.Printf("Error executing query: CALL CreateProduct(%v, %v, %v, %v, %v, %v): %v", product.Name, product.Description, product.Price, product.FoodVenue.Name, product.FoodVenue.Address, email, err)
 		return err
 	}
 

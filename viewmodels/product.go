@@ -8,6 +8,7 @@ type Product struct {
 	Description string    `json:"description"`
 	Price       float64   `json:"price"`
 	FoodVenue   FoodVenue `json:"food_venue"`
+	CreatedBy   string    `json:"created_by"`
 	CreatedAt   int64     `json:"created_at"`
 	UpdatedAt   int64     `json:"updated_at"`
 }

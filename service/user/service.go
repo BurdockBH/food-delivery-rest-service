@@ -53,6 +53,7 @@ func RegisterUser(w http.ResponseWriter, r *http.Request) {
 		StatusCode: statusCodes.SuccesfullyCreatedUser,
 		Message:    statusCodes.StatusCodes[statusCodes.SuccesfullyCreatedUser] + ": " + u.Email,
 	})
+	log.Println("Successfully created user:", u.Email)
 	helper.BaseResponse(w, response, http.StatusOK)
 }
 
@@ -118,6 +119,7 @@ func LoginUser(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	log.Println("Successfully logged in user:", userLogin.Email)
 	helper.BaseResponse(w, jsonResponse, http.StatusOK)
 }
 
@@ -198,6 +200,7 @@ func DeleteUser(w http.ResponseWriter, r *http.Request) {
 		StatusCode: statusCodes.SuccesfullyDeletedUser,
 		Message:    statusCodes.StatusCodes[statusCodes.SuccesfullyDeletedUser] + ":" + userLogin.Email,
 	})
+	log.Println("Successfully deleted user:", userLogin.Email)
 	helper.BaseResponse(w, response, http.StatusOK)
 }
 
@@ -297,7 +300,7 @@ func EditUser(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	log.Println("User edited successfully!")
+	log.Println("Successfully updated user:", u.Email)
 	helper.BaseResponse(w, jsonResponse, http.StatusOK)
 }
 
@@ -342,6 +345,6 @@ func GetUsers(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	log.Println("User retrieved successfully!")
+	log.Println("Successfully fetched users")
 	helper.BaseResponse(w, jsonResponse, http.StatusOK)
 }

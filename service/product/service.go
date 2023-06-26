@@ -8,6 +8,7 @@ import (
 	"github.com/BurdockBH/food-delivery-rest-service/viewmodels"
 	"log"
 	"net/http"
+	"strings"
 )
 
 func CreateProduct(w http.ResponseWriter, r *http.Request) {
@@ -24,6 +25,32 @@ func CreateProduct(w http.ResponseWriter, r *http.Request) {
 	}
 	defer r.Body.Close()
 
+	tokenString := r.Header.Get("Authorization")
+	if tokenString == "" {
+		log.Println("Token not found")
+		response, _ := json.Marshal(viewmodels.BaseResponse{
+			StatusCode: statusCodes.TokenNotFound,
+			Message:    statusCodes.StatusCodes[statusCodes.TokenNotFound],
+		})
+		helper.BaseResponse(w, response, http.StatusBadRequest)
+		return
+	}
+
+	tokenString = strings.Replace(tokenString, "Bearer ", "", 1)
+
+	claims, err := helper.ValidateToken(tokenString)
+	if err != nil {
+		log.Println("Token validation failed:", err)
+		response, _ := json.Marshal(viewmodels.BaseResponse{
+			StatusCode: statusCodes.TokenValidationFailed,
+			Message:    statusCodes.StatusCodes[statusCodes.TokenValidationFailed],
+		})
+		helper.BaseResponse(w, response, http.StatusBadRequest)
+		return
+	}
+
+	email := claims["email"].(string)
+
 	err = p.ValidateProduct()
 	if err != nil {
 		log.Println("Failed to validate request body: ", err)
@@ -35,7 +62,7 @@ func CreateProduct(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	err = product.CreateProduct(&p)
+	err = product.CreateProduct(&p, email)
 	if err != nil {
 		log.Println("Failed to create product: ", err)
 		response, _ := json.Marshal(viewmodels.BaseResponse{
@@ -50,6 +77,6 @@ func CreateProduct(w http.ResponseWriter, r *http.Request) {
 		StatusCode: statusCodes.SuccesfullyCreatedProduct,
 		Message:    statusCodes.StatusCodes[statusCodes.SuccesfullyCreatedProduct] + ":" + p.Name,
 	})
+	log.Printf("Product %s created successfully", p.Name)
 	helper.BaseResponse(w, response, http.StatusOK)
-
 }

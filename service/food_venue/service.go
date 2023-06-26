@@ -77,6 +77,7 @@ func CreateFoodVenue(w http.ResponseWriter, r *http.Request) {
 		StatusCode: statusCodes.SuccesfullyCreatedFoodVenue,
 		Message:    statusCodes.StatusCodes[statusCodes.SuccesfullyCreatedFoodVenue] + ":" + foodVenue.Name,
 	})
+	log.Printf("Food venue created: %s", foodVenue.Name)
 	helper.BaseResponse(w, response, http.StatusOK)
 }
 
@@ -134,6 +135,7 @@ func DeleteFoodVenue(w http.ResponseWriter, r *http.Request) {
 		Message:    statusCodes.StatusCodes[statusCodes.SuccesfullyDeletedFoodVenue] + ":" + foodVenue.Name,
 	})
 
+	log.Printf("Food venue deleted: %s", foodVenue.Name)
 	helper.BaseResponse(w, response, http.StatusOK)
 }
 
@@ -170,5 +172,6 @@ func GetFoodVenues(w http.ResponseWriter, r *http.Request) {
 		FoodVenues: foodVenues,
 	})
 
+	log.Printf("Food venues fetched: %d", len(foodVenues))
 	helper.BaseResponse(w, response, http.StatusOK)
 }
