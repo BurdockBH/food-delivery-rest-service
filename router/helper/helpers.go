@@ -1,11 +1,16 @@
 package helper
 
 import (
+	"encoding/json"
 	"fmt"
 	"github.com/BurdockBH/food-delivery-rest-service/config"
+	"github.com/BurdockBH/food-delivery-rest-service/statusCodes"
+	"github.com/BurdockBH/food-delivery-rest-service/viewmodels"
 	"github.com/golang-jwt/jwt/v5"
 	"golang.org/x/crypto/bcrypt"
+	"log"
 	"net/http"
+	"strings"
 	"time"
 )
 
@@ -74,11 +79,30 @@ func BaseResponse(w http.ResponseWriter, response []byte, statusCode int) {
 	}
 }
 
-//func MockDb(t *testing.T) (sqlmock.Sqlmock, error) {
-//	db2, mock, err := sqlmock.New()
-//	assert.NoError(t, err)
-//	defer db2.Close()
-//	db.DB = db2
-//
-//	return mock, err
-//}
+func CheckToken(w *http.ResponseWriter, r *http.Request) *jwt.MapClaims {
+	tokenString := r.Header.Get("Authorization")
+	if tokenString == "" {
+		log.Println("Token not found")
+		response, _ := json.Marshal(viewmodels.BaseResponse{
+			StatusCode: statusCodes.TokenNotFound,
+			Message:    statusCodes.StatusCodes[statusCodes.TokenNotFound],
+		})
+		BaseResponse(*w, response, http.StatusBadRequest)
+		return nil
+	}
+
+	tokenString = strings.Replace(tokenString, "Bearer ", "", 1)
+
+	claims, err := ValidateToken(tokenString)
+	if err != nil {
+		log.Println("Token validation failed:", err)
+		response, _ := json.Marshal(viewmodels.BaseResponse{
+			StatusCode: statusCodes.TokenValidationFailed,
+			Message:    statusCodes.StatusCodes[statusCodes.TokenValidationFailed],
+		})
+		BaseResponse(*w, response, http.StatusBadRequest)
+		return nil
+	}
+
+	return &claims
+}

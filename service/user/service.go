@@ -8,7 +8,6 @@ import (
 	"github.com/BurdockBH/food-delivery-rest-service/viewmodels"
 	"log"
 	"net/http"
-	"strings"
 )
 
 // RegisterUser registers a new user in the database
@@ -125,29 +124,7 @@ func LoginUser(w http.ResponseWriter, r *http.Request) {
 
 // DeleteUser deletes a user from the database
 func DeleteUser(w http.ResponseWriter, r *http.Request) {
-	tokenString := r.Header.Get("Authorization")
-	if tokenString == "" {
-		log.Println("Token not found")
-		response, _ := json.Marshal(viewmodels.BaseResponse{
-			StatusCode: statusCodes.TokenNotFound,
-			Message:    statusCodes.StatusCodes[statusCodes.TokenNotFound],
-		})
-		helper.BaseResponse(w, response, http.StatusBadRequest)
-		return
-	}
-
-	tokenString = strings.Replace(tokenString, "Bearer ", "", 1)
-
-	claims, err := helper.ValidateToken(tokenString)
-	if err != nil {
-		log.Println("Token validation failed:", err)
-		response, _ := json.Marshal(viewmodels.BaseResponse{
-			StatusCode: statusCodes.TokenValidationFailed,
-			Message:    statusCodes.StatusCodes[statusCodes.TokenValidationFailed],
-		})
-		helper.BaseResponse(w, response, http.StatusBadRequest)
-		return
-	}
+	claims := *helper.CheckToken(&w, r)
 
 	var userLogin viewmodels.UserLoginRequest
 
@@ -161,7 +138,7 @@ func DeleteUser(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	err = json.NewDecoder(r.Body).Decode(&userLogin)
+	err := json.NewDecoder(r.Body).Decode(&userLogin)
 	if err != nil {
 		log.Println("Failed to decode request body:", err)
 		response, _ := json.Marshal(viewmodels.BaseResponse{
@@ -206,29 +183,7 @@ func DeleteUser(w http.ResponseWriter, r *http.Request) {
 
 // EditUser edits a user in the database
 func EditUser(w http.ResponseWriter, r *http.Request) {
-	tokenString := r.Header.Get("Authorization")
-	if tokenString == "" {
-		log.Println("Token not found")
-		response, _ := json.Marshal(viewmodels.BaseResponse{
-			StatusCode: statusCodes.TokenNotFound,
-			Message:    statusCodes.StatusCodes[statusCodes.TokenNotFound],
-		})
-		helper.BaseResponse(w, response, http.StatusBadRequest)
-		return
-	}
-
-	tokenString = strings.Replace(tokenString, "Bearer ", "", 1)
-
-	claims, err := helper.ValidateToken(tokenString)
-	if err != nil {
-		log.Println("Token validation failed:", err)
-		response, _ := json.Marshal(viewmodels.BaseResponse{
-			StatusCode: statusCodes.TokenValidationFailed,
-			Message:    statusCodes.StatusCodes[statusCodes.TokenValidationFailed] + ":" + err.Error(),
-		})
-		helper.BaseResponse(w, response, http.StatusBadRequest)
-		return
-	}
+	claims := *helper.CheckToken(&w, r)
 
 	var u viewmodels.User
 
@@ -242,7 +197,7 @@ func EditUser(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	err = json.NewDecoder(r.Body).Decode(&u)
+	err := json.NewDecoder(r.Body).Decode(&u)
 	if err != nil {
 		log.Println("Failed to decode request body:", err)
 		response, _ := json.Marshal(viewmodels.BaseResponse{
