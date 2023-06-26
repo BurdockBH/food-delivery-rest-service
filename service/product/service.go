@@ -71,29 +71,7 @@ func DeleteProduct(w http.ResponseWriter, r *http.Request) {
 	}
 	defer r.Body.Close()
 
-	tokenString := r.Header.Get("Authorization")
-	if tokenString == "" {
-		log.Println("Token not found")
-		response, _ := json.Marshal(viewmodels.BaseResponse{
-			StatusCode: statusCodes.TokenNotFound,
-			Message:    statusCodes.StatusCodes[statusCodes.TokenNotFound],
-		})
-		helper.BaseResponse(w, response, http.StatusBadRequest)
-		return
-	}
-
-	tokenString = strings.Replace(tokenString, "Bearer ", "", 1)
-
-	_, err = helper.ValidateToken(tokenString)
-	if err != nil {
-		log.Println("Token validation failed:", err)
-		response, _ := json.Marshal(viewmodels.BaseResponse{
-			StatusCode: statusCodes.TokenValidationFailed,
-			Message:    statusCodes.StatusCodes[statusCodes.TokenValidationFailed],
-		})
-		helper.BaseResponse(w, response, http.StatusBadRequest)
-		return
-	}
+	_ = *helper.CheckToken(&w, r)
 
 	err = product.DeleteProduct(&p)
 	if err != nil {
@@ -128,29 +106,7 @@ func EditProduct(w http.ResponseWriter, r *http.Request) {
 	}
 	defer r.Body.Close()
 
-	tokenString := r.Header.Get("Authorization")
-	if tokenString == "" {
-		log.Println("Token not found")
-		response, _ := json.Marshal(viewmodels.BaseResponse{
-			StatusCode: statusCodes.TokenNotFound,
-			Message:    statusCodes.StatusCodes[statusCodes.TokenNotFound],
-		})
-		helper.BaseResponse(w, response, http.StatusBadRequest)
-		return
-	}
-
-	tokenString = strings.Replace(tokenString, "Bearer ", "", 1)
-
-	_, err = helper.ValidateToken(tokenString)
-	if err != nil {
-		log.Println("Token validation failed:", err)
-		response, _ := json.Marshal(viewmodels.BaseResponse{
-			StatusCode: statusCodes.TokenValidationFailed,
-			Message:    statusCodes.StatusCodes[statusCodes.TokenValidationFailed],
-		})
-		helper.BaseResponse(w, response, http.StatusBadRequest)
-		return
-	}
+	_ = *helper.CheckToken(&w, r)
 
 	err = product.EditProduct(&p)
 	if err != nil {

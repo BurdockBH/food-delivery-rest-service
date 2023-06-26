@@ -140,8 +140,8 @@ func EditUser(u *viewmodels.User) error {
 		log.Printf("User with email %v does not exist", u.Email)
 		return errors.New(fmt.Sprintf("user with email %v does not exist", u.Email))
 	} else if updated == -2 {
-		log.Printf("User with phone number: %v does not exist", u.Phone)
-		return errors.New(fmt.Sprintf("user with phone number: %v does not exist", u.Phone))
+		log.Printf("User with phone number: %v already exists", u.Phone)
+		return errors.New(fmt.Sprintf("user with phone number: %v already exists", u.Phone))
 	}
 
 	return nil
