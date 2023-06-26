@@ -2,8 +2,8 @@
 -- +goose StatementBegin
 CREATE TRIGGER IF NOT EXISTS setTimestampsProducts BEFORE INSERT ON products
     FOR EACH ROW
-SET NEW.created_at = CURRENT_TIMESTAMP(),
-    NEW.updated_at = CURRENT_TIMESTAMP();
+SET NEW.created_at = UNIX_TIMESTAMP(NOW()),
+    NEW.updated_at = UNIX_TIMESTAMP(NOW());
 
 
 -- +goose StatementEnd

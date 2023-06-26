@@ -1,9 +1,9 @@
 -- +goose Up
 -- +goose StatementBegin
-CREATE TRIGGER IF NOT EXISTS setTimestampsFoodVenues BEFORE INSERT ON food_venues
+CREATE TRIGGER IF NOT EXISTS setTimestampsUsers BEFORE INSERT ON users
     FOR EACH ROW
-SET NEW.created_at = CURRENT_TIMESTAMP(),
-    NEW.updated_at = CURRENT_TIMESTAMP();
+SET NEW.created_at = UNIX_TIMESTAMP(NOW()),
+    NEW.updated_at = UNIX_TIMESTAMP(NOW());
 
 
 -- +goose StatementEnd
