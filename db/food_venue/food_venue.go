@@ -6,22 +6,21 @@ import (
 	"github.com/BurdockBH/food-delivery-rest-service/db"
 	"github.com/BurdockBH/food-delivery-rest-service/viewmodels"
 	"log"
-	"time"
 )
 
-func CreateFoodVenue(fv *viewmodels.FoodVenue) error {
-	query := "CALL CreateFoodVenue(?, ?, ?, ?)"
+func CreateFoodVenue(fv *viewmodels.FoodVenue, email string) error {
+	query := "CALL CreateFoodVenue(?, ?, ?)"
 
 	st, err := db.DB.Prepare(query)
 	if err != nil {
-		log.Printf("Error preparing query: CALL CreateFoodVenue(%v, %v): %v", fv.Name, fv.Address, err)
+		log.Printf("Error preparing query: CALL CreateFoodVenue(%v, %v, %v): %v", fv.Name, fv.Address, fv.CreatedBy, err)
 		return err
 	}
 	defer st.Close()
 
-	rows, err := st.Exec(fv.Name, fv.Address, time.Now().Unix(), time.Now().Unix())
+	rows, err := st.Exec(fv.Name, fv.Address, email)
 	if err != nil {
-		log.Printf("Error executing query: CALL CreateFoodVenue(%v, %v): %v", fv.Name, fv.Address, err)
+		log.Printf("Error executing query: CALL CreateFoodVenue(%v, %v, %v): %v", fv.Name, fv.Address, fv.CreatedBy, err)
 		return err
 	}
 
@@ -45,14 +44,14 @@ func DeleteFoodVenue(fv *viewmodels.FoodVenue) error {
 
 	st, err := db.DB.Prepare(query)
 	if err != nil {
-		log.Printf("Error preparing query: CALL DeleteFoodVenue(%v, %v): %v", fv.Name, fv.Address, err)
+		log.Printf("Error preparing query: CALL DeleteFoodVenue(%v, %v, %v): %v", fv.ID, fv.Name, fv.Address, err)
 		return err
 	}
 	defer st.Close()
 
 	err = st.QueryRow(fv.ID, fv.Name, fv.Address).Scan(&deleted)
 	if err != nil {
-		log.Printf("Error executing query: CALL DeleteFoodVenue(%v, %v): %v", fv.Name, fv.Address, err)
+		log.Printf("Error executing query: CALL DeleteFoodVenue(%v, %v, %v): %v", fv.ID, fv.Name, fv.Address, err)
 		return err
 	}
 
@@ -65,7 +64,7 @@ func DeleteFoodVenue(fv *viewmodels.FoodVenue) error {
 }
 
 func GetVenues(fv *viewmodels.FoodVenue) ([]viewmodels.FoodVenue, error) {
-	query := "CALL GetVenues(?, ?)"
+	query := "CALL GetVenues(?, ?, ?)"
 	st, err := db.DB.Prepare(query)
 	if err != nil {
 		log.Printf("Error preparing query: CALL GetVenues(%v, %v): %v", fv.Name, fv.Address, err)
@@ -73,9 +72,9 @@ func GetVenues(fv *viewmodels.FoodVenue) ([]viewmodels.FoodVenue, error) {
 	}
 	defer st.Close()
 
-	rows, err := st.Query(fv.Name, fv.Address)
+	rows, err := st.Query(fv.Name, fv.Address, fv.CreatedBy)
 	if err != nil {
-		log.Printf("Error executing query: CALL GetVenues(%v, %v): %v", fv.Name, fv.Address, err)
+		log.Printf("Error executing query: CALL GetVenues(%v, %v, %v): %v", fv.Name, fv.Address, fv.CreatedBy, err)
 		return nil, err
 	}
 	defer rows.Close()
@@ -83,7 +82,7 @@ func GetVenues(fv *viewmodels.FoodVenue) ([]viewmodels.FoodVenue, error) {
 	var venues []viewmodels.FoodVenue
 	for rows.Next() {
 		var venue viewmodels.FoodVenue
-		err = rows.Scan(&venue.ID, &venue.Name, &venue.Address, &venue.CreatedAt, &venue.UpdatedAt)
+		err = rows.Scan(&venue.ID, &venue.Name, &venue.Address, &venue.CreatedBy, &venue.CreatedAt, &venue.UpdatedAt)
 		if err != nil {
 			log.Printf("Error scanning row: %v", err)
 			return nil, err
