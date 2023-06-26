@@ -31,6 +31,12 @@ const (
 	FailedToValidateProduct      = 28
 	FailedToCreateProduct        = 29
 	SuccesfullyCreatedProduct    = 30
+	FailedToDeleteProduct        = 31
+	SuccesfullyDeletedProduct    = 32
+	FailedToUpdateProduct        = 33
+	SuccesfullyUpdatedProduct    = 34
+	FailedToGetProducts          = 35
+	SuccesfullyFetchedProducts   = 36
 )
 
 var StatusCodes = map[int64]string{
@@ -64,4 +70,10 @@ var StatusCodes = map[int64]string{
 	FailedToValidateProduct:      "Failed to validate product",
 	FailedToCreateProduct:        "Failed to create product",
 	SuccesfullyCreatedProduct:    "Product created successfully!",
+	FailedToDeleteProduct:        "Failed to delete product",
+	SuccesfullyDeletedProduct:    "Product deleted successfully!",
+	FailedToUpdateProduct:        "Failed to update product",
+	SuccesfullyUpdatedProduct:    "Product updated successfully!",
+	FailedToGetProducts:          "Failed to get products",
+	SuccesfullyFetchedProducts:   "Products fetched successfully!",
 }

@@ -22,3 +22,8 @@ type FoodVenueList struct {
 	BaseResponse
 	FoodVenues []FoodVenue `json:"food_venues"`
 }
+
+type ProductList struct {
+	BaseResponse
+	Products []Product `json:"products"`
+}
