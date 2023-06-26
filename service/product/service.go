@@ -8,7 +8,6 @@ import (
 	"github.com/BurdockBH/food-delivery-rest-service/viewmodels"
 	"log"
 	"net/http"
-	"strings"
 )
 
 func CreateProduct(w http.ResponseWriter, r *http.Request) {
@@ -25,30 +24,7 @@ func CreateProduct(w http.ResponseWriter, r *http.Request) {
 	}
 	defer r.Body.Close()
 
-	tokenString := r.Header.Get("Authorization")
-	if tokenString == "" {
-		log.Println("Token not found")
-		response, _ := json.Marshal(viewmodels.BaseResponse{
-			StatusCode: statusCodes.TokenNotFound,
-			Message:    statusCodes.StatusCodes[statusCodes.TokenNotFound],
-		})
-		helper.BaseResponse(w, response, http.StatusBadRequest)
-		return
-	}
-
-	tokenString = strings.Replace(tokenString, "Bearer ", "", 1)
-
-	claims, err := helper.ValidateToken(tokenString)
-	if err != nil {
-		log.Println("Token validation failed:", err)
-		response, _ := json.Marshal(viewmodels.BaseResponse{
-			StatusCode: statusCodes.TokenValidationFailed,
-			Message:    statusCodes.StatusCodes[statusCodes.TokenValidationFailed],
-		})
-		helper.BaseResponse(w, response, http.StatusBadRequest)
-		return
-	}
-
+	claims := *helper.CheckToken(&w, r)
 	email := claims["email"].(string)
 
 	err = p.ValidateProduct()
