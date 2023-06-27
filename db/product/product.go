@@ -62,18 +62,18 @@ func DeleteProduct(id int64) error {
 }
 
 func EditProduct(product *viewmodels.Product) error {
-	query := "CALL EditProduct(?, ?, ?, ?)"
+	query := "CALL EditProduct(?, ?, ?, ?, ?)"
 	st, err := db.DB.Prepare(query)
 	if err != nil {
-		log.Printf("Error preparing query: CALL EditProduct(%v, %v, %v, %v): %v", product.ID, product.Name, product.Description, product.Price, err)
+		log.Printf("Error preparing query: CALL EditProduct(%v, %v, %v, %v, %v): %v", product.ID, product.Name, product.Description, product.Price, product.Quantity, err)
 		return err
 	}
 	defer st.Close()
 
 	var edited int
-	err = st.QueryRow(product.ID, product.Name, product.Description, product.Price).Scan(&edited)
+	err = st.QueryRow(product.ID, product.Name, product.Description, product.Price, product.Quantity).Scan(&edited)
 	if err != nil {
-		log.Printf("Error executing query: CALL EditProduct(%v, %v, %v, %v): %v", product.ID, product.Name, product.Description, product.Price, err)
+		log.Printf("Error executing query: CALL EditProduct(%v, %v, %v, %v, %v): %v", product.ID, product.Name, product.Description, product.Price, product.Quantity, err)
 		return err
 	}
 
