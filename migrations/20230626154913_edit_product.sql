@@ -7,10 +7,7 @@ CREATE PROCEDURE `EditProduct`(
     IN inProductPrice FLOAT
 )
 BEGIN
-
-    IF (SELECT id FROM products WHERE id = inProductId) IS NULL THEN
-        SELECT 0;
-    ELSE
+    IF (SELECT id FROM products WHERE id = inProductId) IS NOT NULL THEN
         UPDATE products
         SET name = inProductName, description = inProductDescription, price = inProductPrice
         WHERE id = inProductId;

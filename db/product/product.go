@@ -37,25 +37,25 @@ func CreateProduct(product *viewmodels.Product, email string) error {
 	return nil
 }
 
-func DeleteProduct(product *viewmodels.Product) error {
+func DeleteProduct(id int) error {
 	query := "CALL DeleteProduct(?)"
 	st, err := db.DB.Prepare(query)
 	if err != nil {
-		log.Printf("Error preparing query: CALL DeleteProduct(%v, %v): %v", product.Name, product.FoodVenue.Name, err)
+		log.Printf("Error preparing query: CALL DeleteProduct(%v): %v", id, err)
 		return err
 	}
 	defer st.Close()
 
 	var deleted int
-	err = st.QueryRow(product.ID).Scan(&deleted)
+	err = st.QueryRow(id).Scan(&deleted)
 	if err != nil {
-		log.Printf("Error executing query: CALL DeleteProduct(%v): %v", product.ID, err)
+		log.Printf("Error executing query: CALL DeleteProduct(%v): %v", id, err)
 		return err
 	}
 
 	if deleted == 0 {
-		log.Printf("Product with id %v does not exist", product.ID)
-		return errors.New(fmt.Sprintf("Product with id %v does not exist", product.ID))
+		log.Printf("Product with id %v does not exist", id)
+		return errors.New(fmt.Sprintf("Product with id %v does not exist", id))
 	}
 
 	return nil
@@ -77,7 +77,7 @@ func EditProduct(product *viewmodels.Product) error {
 		return err
 	}
 
-	if edited == 0 {
+	if edited != 1 {
 		log.Printf("Product with id %v does not exist", product.ID)
 		return errors.New(fmt.Sprintf("Product with id %v does not exist", product.ID))
 	}
@@ -85,18 +85,18 @@ func EditProduct(product *viewmodels.Product) error {
 	return nil
 }
 
-func GetProducts(product *viewmodels.Product) ([]viewmodels.Product, error) {
-	query := "CALL GetProducts(?, ?, ?)"
+func GetProducts(venueId int) ([]viewmodels.Product, error) {
+	query := "CALL GetProducts(?)"
 	st, err := db.DB.Prepare(query)
 	if err != nil {
-		log.Printf("Error preparing query: CALL GetProducts(%v, %v, %v): %v", product.Name, product.FoodVenue.Name, product.FoodVenue.Address, err)
+		log.Printf("Error preparing query: CALL GetProducts(%v): %v", venueId, err)
 		return nil, err
 	}
 	defer st.Close()
 
-	rows, err := st.Query(product.Name, product.FoodVenue.Name, product.FoodVenue.Address)
+	rows, err := st.Query(venueId)
 	if err != nil {
-		log.Printf("Error executing query: CALL GetProducts(%v, %v, %v): %v", product.Name, product.FoodVenue.Name, product.FoodVenue.Address, err)
+		log.Printf("Error executing query: CALL GetProducts(%v): %v", venueId, err)
 		return nil, err
 	}
 	defer rows.Close()

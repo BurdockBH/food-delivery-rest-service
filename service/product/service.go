@@ -58,8 +58,8 @@ func CreateProduct(w http.ResponseWriter, r *http.Request) {
 }
 
 func DeleteProduct(w http.ResponseWriter, r *http.Request) {
-	var p viewmodels.Product
-	err := json.NewDecoder(r.Body).Decode(&p)
+	var id viewmodels.ItemIdRequest
+	err := json.NewDecoder(r.Body).Decode(&id)
 	if err != nil {
 		log.Println("Failed to decode request body: ", err)
 		response, _ := json.Marshal(viewmodels.BaseResponse{
@@ -73,9 +73,9 @@ func DeleteProduct(w http.ResponseWriter, r *http.Request) {
 
 	_ = *helper.CheckToken(&w, r)
 
-	err = product.DeleteProduct(&p)
+	err = product.DeleteProduct(id.Id)
 	if err != nil {
-		log.Println("Failed to create product: ", err)
+		log.Println("Failed to delete product: ", err)
 		response, _ := json.Marshal(viewmodels.BaseResponse{
 			StatusCode: statusCodes.FailedToDeleteProduct,
 			Message:    statusCodes.StatusCodes[statusCodes.FailedToDeleteProduct] + ":" + err.Error(),
@@ -86,9 +86,9 @@ func DeleteProduct(w http.ResponseWriter, r *http.Request) {
 
 	response, _ := json.Marshal(viewmodels.BaseResponse{
 		StatusCode: statusCodes.SuccesfullyDeletedProduct,
-		Message:    statusCodes.StatusCodes[statusCodes.SuccesfullyDeletedProduct] + ":" + p.Name,
+		Message:    statusCodes.StatusCodes[statusCodes.SuccesfullyDeletedProduct] + ":" + string(id.Id),
 	})
-	log.Printf("Product %s deleted successfully", p.Name)
+	log.Printf("Product with id %v deleted successfully", id)
 	helper.BaseResponse(w, response, http.StatusOK)
 }
 
@@ -105,6 +105,17 @@ func EditProduct(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	defer r.Body.Close()
+
+	err = p.ValidateProduct()
+	if err != nil {
+		log.Println("Failed to validate request body: ", err)
+		response, _ := json.Marshal(viewmodels.BaseResponse{
+			StatusCode: statusCodes.FailedToValidateProduct,
+			Message:    statusCodes.StatusCodes[statusCodes.FailedToValidateProduct],
+		})
+		helper.BaseResponse(w, response, http.StatusBadRequest)
+		return
+	}
 
 	_ = *helper.CheckToken(&w, r)
 
@@ -123,13 +134,13 @@ func EditProduct(w http.ResponseWriter, r *http.Request) {
 		StatusCode: statusCodes.SuccesfullyUpdatedProduct,
 		Message:    statusCodes.StatusCodes[statusCodes.SuccesfullyUpdatedProduct] + ":" + p.Name,
 	})
-	log.Printf("Product %s deleted successfully", p.Name)
+	log.Printf("Product %s updated successfully", p.Name)
 	helper.BaseResponse(w, response, http.StatusOK)
 }
 
 func GetProducts(w http.ResponseWriter, r *http.Request) {
-	var p viewmodels.Product
-	err := json.NewDecoder(r.Body).Decode(&p)
+	var venueId viewmodels.ItemIdRequest
+	err := json.NewDecoder(r.Body).Decode(&venueId)
 	if err != nil {
 		log.Println("Failed to decode request body: ", err)
 		response, _ := json.Marshal(viewmodels.BaseResponse{
@@ -141,7 +152,7 @@ func GetProducts(w http.ResponseWriter, r *http.Request) {
 	}
 	defer r.Body.Close()
 
-	products, err := product.GetProducts(&p)
+	products, err := product.GetProducts(venueId.Id)
 	if err != nil {
 		log.Println("Failed to get products: ", err)
 		response, _ := json.Marshal(viewmodels.BaseResponse{
@@ -156,7 +167,7 @@ func GetProducts(w http.ResponseWriter, r *http.Request) {
 		Products: products,
 		BaseResponse: viewmodels.BaseResponse{
 			StatusCode: statusCodes.SuccesfullyFetchedProducts,
-			Message:    statusCodes.StatusCodes[statusCodes.SuccesfullyFetchedProducts] + ":" + p.Name,
+			Message:    statusCodes.StatusCodes[statusCodes.SuccesfullyFetchedProducts] + ":" + string(venueId.Id),
 		},
 	})
 	log.Printf("Products fetched successfully")
