@@ -13,15 +13,15 @@ func InitializeRouter() *http.ServeMux {
 	router := http.NewServeMux()
 
 	// User routes
-	router.HandleFunc("/users/register", middlewares.Chain(middlewares.Post)(user.RegisterUser))
-	router.HandleFunc("/users/login", middlewares.Chain(middlewares.Post)(user.LoginUser))
-	router.HandleFunc("/users/delete", middlewares.Chain(middlewares.Delete)(user.DeleteUser))
-	router.HandleFunc("/users/edit", middlewares.Chain(middlewares.Put)(user.EditUser))
+	router.HandleFunc("/user/register", middlewares.Chain(middlewares.Post)(user.RegisterUser))
+	router.HandleFunc("/user/login", middlewares.Chain(middlewares.Post)(user.LoginUser))
+	router.HandleFunc("/user/delete", middlewares.Chain(middlewares.Delete)(user.DeleteUser))
+	router.HandleFunc("/user/edit", middlewares.Chain(middlewares.Put)(user.EditUser))
 	router.HandleFunc("/users/get", middlewares.Chain(middlewares.Get)(user.GetUsers))
 
 	// Food venue routes
-	router.HandleFunc("/food-venues/create", middlewares.Chain(middlewares.Post)(food_venue.CreateFoodVenue))
-	router.HandleFunc("/food-venues/delete", middlewares.Chain(middlewares.Delete)(food_venue.DeleteFoodVenue))
+	router.HandleFunc("/food-venue/create", middlewares.Chain(middlewares.Post)(food_venue.CreateFoodVenue))
+	router.HandleFunc("/food-venue/delete", middlewares.Chain(middlewares.Delete)(food_venue.DeleteFoodVenue))
 	router.HandleFunc("/food-venues/get", middlewares.Chain(middlewares.Get)(food_venue.GetFoodVenues))
 
 	// Product routes

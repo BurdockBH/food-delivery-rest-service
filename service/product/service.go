@@ -24,7 +24,11 @@ func CreateProduct(w http.ResponseWriter, r *http.Request) {
 	}
 	defer r.Body.Close()
 
-	claims := *helper.CheckToken(&w, r)
+	claims := helper.CheckToken(&w, r)
+	if claims == nil {
+		return
+	}
+
 	email := claims["email"].(string)
 
 	err = p.ValidateProduct()
@@ -71,7 +75,22 @@ func DeleteProduct(w http.ResponseWriter, r *http.Request) {
 	}
 	defer r.Body.Close()
 
-	_ = *helper.CheckToken(&w, r)
+	err = id.ValidateItemIdRequest()
+
+	if err != nil {
+		log.Println("Failed to validate request body: ", err)
+		response, _ := json.Marshal(viewmodels.BaseResponse{
+			StatusCode: statusCodes.FailedToValidateItemIdRequest,
+			Message:    statusCodes.StatusCodes[statusCodes.FailedToValidateItemIdRequest],
+		})
+		helper.BaseResponse(w, response, http.StatusBadRequest)
+		return
+	}
+
+	claims := helper.CheckToken(&w, r)
+	if claims == nil {
+		return
+	}
 
 	err = product.DeleteProduct(id.Id)
 	if err != nil {
@@ -117,7 +136,9 @@ func EditProduct(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	_ = *helper.CheckToken(&w, r)
+	if c := helper.CheckToken(&w, r); c == nil {
+		return
+	}
 
 	err = product.EditProduct(&p)
 	if err != nil {
@@ -151,6 +172,18 @@ func GetProducts(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	defer r.Body.Close()
+
+	err = venueId.ValidateItemIdRequest()
+
+	if err != nil {
+		log.Println("Failed to validate id request body: ", err)
+		response, _ := json.Marshal(viewmodels.BaseResponse{
+			StatusCode: statusCodes.FailedToValidateItemIdRequest,
+			Message:    statusCodes.StatusCodes[statusCodes.FailedToValidateItemIdRequest],
+		})
+		helper.BaseResponse(w, response, http.StatusBadRequest)
+		return
+	}
 
 	products, err := product.GetProducts(venueId.Id)
 	if err != nil {

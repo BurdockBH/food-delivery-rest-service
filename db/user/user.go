@@ -37,7 +37,7 @@ func RegisterUser(u *viewmodels.User) error {
 		return err
 	}
 
-	if created == 0 {
+	if created != 1 {
 		log.Printf("User with email: %v or phone number: %v already exists", u.Email, u.Phone)
 		return errors.New(fmt.Sprintf("user with email %v or phone number %v already exists", u.Email, u.Phone))
 	}
@@ -105,7 +105,7 @@ func DeleteUser(u *viewmodels.UserLoginRequest) error {
 		return err
 	}
 
-	if deleted == 0 {
+	if deleted != 1 {
 		log.Printf("Couldn't delete %v. No rows affected\n", u.Email)
 		return errors.New(fmt.Sprintf("couldn't delete user %v. No rows affected", u.Email))
 	}

@@ -37,7 +37,7 @@ func CreateProduct(product *viewmodels.Product, email string) error {
 	return nil
 }
 
-func DeleteProduct(id int) error {
+func DeleteProduct(id int64) error {
 	query := "CALL DeleteProduct(?)"
 	st, err := db.DB.Prepare(query)
 	if err != nil {
@@ -53,7 +53,7 @@ func DeleteProduct(id int) error {
 		return err
 	}
 
-	if deleted == 0 {
+	if deleted != 1 {
 		log.Printf("Product with id %v does not exist", id)
 		return errors.New(fmt.Sprintf("Product with id %v does not exist", id))
 	}
@@ -85,7 +85,7 @@ func EditProduct(product *viewmodels.Product) error {
 	return nil
 }
 
-func GetProducts(venueId int) ([]viewmodels.Product, error) {
+func GetProducts(venueId int64) ([]viewmodels.Product, error) {
 	query := "CALL GetProducts(?)"
 	st, err := db.DB.Prepare(query)
 	if err != nil {

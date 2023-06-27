@@ -55,7 +55,7 @@ func DeleteFoodVenue(fv *viewmodels.FoodVenue) error {
 		return err
 	}
 
-	if deleted == 0 {
+	if deleted != 1 {
 		log.Printf("Food venue with id %v does not exist", fv.ID)
 		return errors.New(fmt.Sprintf("Food venue with id %v does not exist", fv.ID))
 	}

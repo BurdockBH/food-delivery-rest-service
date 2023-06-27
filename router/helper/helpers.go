@@ -79,9 +79,9 @@ func BaseResponse(w http.ResponseWriter, response []byte, statusCode int) {
 	}
 }
 
-func CheckToken(w *http.ResponseWriter, r *http.Request) *jwt.MapClaims {
+func CheckToken(w *http.ResponseWriter, r *http.Request) jwt.MapClaims {
 	tokenString := r.Header.Get("Authorization")
-	if tokenString == "" {
+	if len(tokenString) == 0 {
 		log.Println("Token not found")
 		response, _ := json.Marshal(viewmodels.BaseResponse{
 			StatusCode: statusCodes.TokenNotFound,
@@ -104,5 +104,5 @@ func CheckToken(w *http.ResponseWriter, r *http.Request) *jwt.MapClaims {
 		return nil
 	}
 
-	return &claims
+	return claims
 }
