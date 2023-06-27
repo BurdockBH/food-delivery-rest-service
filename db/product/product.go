@@ -9,18 +9,18 @@ import (
 )
 
 func CreateProduct(product *viewmodels.Product, email string) error {
-	query := "CALL CreateProduct(?, ?, ?, ?, ? ,?)"
+	query := "CALL CreateProduct(?, ?, ?, ?, ?, ? ,?)"
 	st, err := db.DB.Prepare(query)
 	if err != nil {
-		log.Printf("Error preparing query: CALL CreateProduct(%v, %v, %v, %v, %v, %v, %v): %v", product.Name, product.Description, product.Price, product.FoodVenue.Name, product.FoodVenue.Address, email, err)
+		log.Printf("Error preparing query: CALL CreateProduct(%v, %v, %v, %v, %v, %v, %): %v", product.Name, product.Description, product.Price, product.Quantity, product.FoodVenue.Name, product.FoodVenue.Address, email, err)
 		return err
 	}
 	defer st.Close()
 
 	var created int
-	err = st.QueryRow(product.Name, product.Description, product.Price, product.FoodVenue.Name, product.FoodVenue.Address, email).Scan(&created)
+	err = st.QueryRow(product.Name, product.Description, product.Price, product.Quantity, product.FoodVenue.Name, product.FoodVenue.Address, email).Scan(&created)
 	if err != nil {
-		log.Printf("Error executing query: CALL CreateProduct(%v, %v, %v, %v, %v, %v): %v", product.Name, product.Description, product.Price, product.FoodVenue.Name, product.FoodVenue.Address, email, err)
+		log.Printf("Error executing query: CALL CreateProduct(%v, %v, %v, %v, %v, %v, %v,): %v", product.Name, product.Description, product.Price, product.Quantity, product.FoodVenue.Name, product.FoodVenue.Address, email, err)
 		return err
 	}
 
@@ -104,7 +104,7 @@ func GetProducts(venueId int64) ([]viewmodels.Product, error) {
 	var products []viewmodels.Product
 	for rows.Next() {
 		var p viewmodels.Product
-		err = rows.Scan(&p.ID, &p.Name, &p.Description, &p.Price, &p.FoodVenue.ID, &p.CreatedBy, &p.CreatedAt, &p.UpdatedAt, &p.FoodVenue.Name, &p.FoodVenue.Address)
+		err = rows.Scan(&p.ID, &p.Name, &p.Description, &p.Price, &p.Quantity, &p.FoodVenue.ID, &p.CreatedBy, &p.CreatedAt, &p.UpdatedAt, &p.FoodVenue.Name, &p.FoodVenue.Address, &p.FoodVenue.CreatedBy, &p.FoodVenue.CreatedAt, &p.FoodVenue.UpdatedAt)
 		if err != nil {
 			log.Printf("Error scanning row: %v", err)
 			products = append(products, viewmodels.Product{})
