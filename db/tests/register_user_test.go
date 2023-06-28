@@ -25,7 +25,7 @@ func TestRegisterUser_Success(t *testing.T) {
 	}
 
 	mock.ExpectPrepare("CALL RegisterUser").ExpectQuery().
-		WithArgs(u.Name, u.Email, sqlmock.AnyArg(), u.Phone, sqlmock.AnyArg(), sqlmock.AnyArg()).
+		WithArgs(u.Name, u.Email, sqlmock.AnyArg(), u.Phone).
 		WillReturnRows(sqlmock.NewRows([]string{"1"}).AddRow(1))
 
 	err = user.RegisterUser(u)
@@ -48,7 +48,7 @@ func TestRegisterUser_UserExists(t *testing.T) {
 	}
 
 	mock.ExpectPrepare("CALL RegisterUser").ExpectQuery().
-		WithArgs(u.Name, u.Email, sqlmock.AnyArg(), u.Phone, sqlmock.AnyArg(), sqlmock.AnyArg()).
+		WithArgs(u.Name, u.Email, sqlmock.AnyArg(), u.Phone).
 		WillReturnRows(sqlmock.NewRows([]string{"0"}).AddRow(0))
 
 	err = user.RegisterUser(u)
@@ -71,11 +71,11 @@ func TestRegisterUser_ArgumentsError(t *testing.T) {
 	}
 
 	mock.ExpectPrepare("CALL RegisterUser").ExpectQuery().WithArgs(
-		u.Name, sqlmock.AnyArg(), u.Phone, sqlmock.AnyArg(), sqlmock.AnyArg()).WillReturnError(fmt.Errorf("Query 'CALL RegisterUser(?, ?, ?, ?, ?, ?)', arguments do not match: expected 5, but got 6 arguments"))
+		u.Name, sqlmock.AnyArg(), u.Phone, sqlmock.AnyArg(), sqlmock.AnyArg()).WillReturnError(fmt.Errorf("Query 'CALL RegisterUser(?, ?, ?, ?)', arguments do not match: expected 5, but got 4 arguments"))
 
 	err = user.RegisterUser(u)
 	assert.Error(t, err)
-	assert.EqualError(t, err, "Query 'CALL RegisterUser(?, ?, ?, ?, ?, ?)', arguments do not match: expected 5, but got 6 arguments")
+	assert.EqualError(t, err, "Query 'CALL RegisterUser(?, ?, ?, ?)', arguments do not match: expected 5, but got 4 arguments")
 }
 
 func TestRegisterUser_PrepareExec(t *testing.T) {
@@ -100,7 +100,7 @@ func TestRegisterUser_PrepareExec(t *testing.T) {
 			err: fmt.Errorf("execution error"),
 			mockFn: func(err error) {
 				mock.ExpectPrepare("CALL RegisterUser").ExpectQuery().
-					WithArgs(sqlmock.AnyArg(), sqlmock.AnyArg(), sqlmock.AnyArg(), sqlmock.AnyArg(), sqlmock.AnyArg(), sqlmock.AnyArg()).
+					WithArgs(sqlmock.AnyArg(), sqlmock.AnyArg(), sqlmock.AnyArg(), sqlmock.AnyArg()).
 					WillReturnError(err)
 			},
 		},
