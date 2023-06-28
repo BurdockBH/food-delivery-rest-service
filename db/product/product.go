@@ -12,7 +12,7 @@ func CreateProduct(product *viewmodels.Product, email string) error {
 	query := "CALL CreateProduct(?, ?, ?, ?, ?, ? ,?)"
 	st, err := db.DB.Prepare(query)
 	if err != nil {
-		log.Printf("Error preparing query: CALL CreateProduct(%v, %v, %v, %v, %v, %v, %): %v", product.Name, product.Description, product.Price, product.Quantity, product.FoodVenue.Name, product.FoodVenue.Address, email, err)
+		log.Printf("Error preparing query: CALL CreateProduct(%v, %v, %v, %v, %v, %v, %v): %v", product.Name, product.Description, product.Price, product.Quantity, product.FoodVenue.Name, product.FoodVenue.Address, email, err)
 		return err
 	}
 	defer st.Close()
