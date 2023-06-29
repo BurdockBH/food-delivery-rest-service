@@ -2,8 +2,8 @@ package product
 
 import (
 	"fmt"
-	"github.com/BurdockBH/food-delivery-rest-service/db"
 	"github.com/BurdockBH/food-delivery-rest-service/db/product"
+	"github.com/BurdockBH/food-delivery-rest-service/router/helper"
 	"github.com/BurdockBH/food-delivery-rest-service/viewmodels"
 	"github.com/DATA-DOG/go-sqlmock"
 	"github.com/stretchr/testify/assert"
@@ -11,11 +11,9 @@ import (
 )
 
 func TestCreateProduct_Success(t *testing.T) {
-	db2, mock, err := sqlmock.New()
+	db2, mock, err := helper.MockDatabase()
 	assert.NoError(t, err)
 	defer db2.Close()
-
-	db.DB = db2
 
 	p := viewmodels.Product{
 		Name:        "Burger",
@@ -38,11 +36,9 @@ func TestCreateProduct_Success(t *testing.T) {
 }
 
 func TestCreateProduct_ProductExists(t *testing.T) {
-	db2, mock, err := sqlmock.New()
+	db2, mock, err := helper.MockDatabase()
 	assert.NoError(t, err)
 	defer db2.Close()
-
-	db.DB = db2
 
 	p := viewmodels.Product{
 		Name:        "Burger",
@@ -65,11 +61,9 @@ func TestCreateProduct_ProductExists(t *testing.T) {
 }
 
 func TestCreateProduct_ArgumentsError(t *testing.T) {
-	db2, mock, err := sqlmock.New()
+	db2, mock, err := helper.MockDatabase()
 	assert.NoError(t, err)
 	defer db2.Close()
-
-	db.DB = db2
 
 	p := viewmodels.Product{
 		Name:        "Burger",
@@ -91,11 +85,9 @@ func TestCreateProduct_ArgumentsError(t *testing.T) {
 }
 
 func TestCreateProduct_PrepareExec(t *testing.T) {
-	db2, mock, err := sqlmock.New()
+	db2, mock, err := helper.MockDatabase()
 	assert.NoError(t, err)
 	defer db2.Close()
-
-	db.DB = db2
 
 	testData := []struct {
 		err    error

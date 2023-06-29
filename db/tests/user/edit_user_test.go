@@ -2,8 +2,8 @@ package user
 
 import (
 	"fmt"
-	"github.com/BurdockBH/food-delivery-rest-service/db"
 	"github.com/BurdockBH/food-delivery-rest-service/db/user"
+	"github.com/BurdockBH/food-delivery-rest-service/router/helper"
 	"github.com/BurdockBH/food-delivery-rest-service/viewmodels"
 	"github.com/DATA-DOG/go-sqlmock"
 	"github.com/stretchr/testify/assert"
@@ -11,11 +11,9 @@ import (
 )
 
 func TestEditUser(t *testing.T) {
-	db2, mock, err := sqlmock.New()
+	db2, mock, err := helper.MockDatabase()
 	assert.NoError(t, err)
 	defer db2.Close()
-
-	db.DB = db2
 
 	registerUser := &viewmodels.User{
 		Name:     "John Doe",
@@ -33,11 +31,9 @@ func TestEditUser(t *testing.T) {
 }
 
 func TestEditUser_Fail(t *testing.T) {
-	db2, mock, err := sqlmock.New()
+	db2, mock, err := helper.MockDatabase()
 	assert.NoError(t, err)
 	defer db2.Close()
-
-	db.DB = db2
 
 	u := &viewmodels.User{
 		Name:     "John Doe",
@@ -60,11 +56,9 @@ func TestEditUser_Fail(t *testing.T) {
 }
 
 func TestEditUser_PrepareExec(t *testing.T) {
-	db2, mock, err := sqlmock.New()
+	db2, mock, err := helper.MockDatabase()
 	assert.NoError(t, err)
 	defer db2.Close()
-
-	db.DB = db2
 
 	testData := []struct {
 		err    error

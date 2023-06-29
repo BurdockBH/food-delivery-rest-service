@@ -2,8 +2,8 @@ package food_venue
 
 import (
 	"fmt"
-	"github.com/BurdockBH/food-delivery-rest-service/db"
 	"github.com/BurdockBH/food-delivery-rest-service/db/food_venue"
+	"github.com/BurdockBH/food-delivery-rest-service/router/helper"
 	"github.com/BurdockBH/food-delivery-rest-service/viewmodels"
 	"github.com/DATA-DOG/go-sqlmock"
 	"github.com/stretchr/testify/assert"
@@ -11,11 +11,9 @@ import (
 )
 
 func TestCreateVenue_Success(t *testing.T) {
-	db2, mock, err := sqlmock.New()
+	db2, mock, err := helper.MockDatabase()
 	assert.NoError(t, err)
 	defer db2.Close()
-
-	db.DB = db2
 
 	fv := viewmodels.FoodVenue{
 		Name:    "Venue",
@@ -31,11 +29,9 @@ func TestCreateVenue_Success(t *testing.T) {
 }
 
 func TestCreateVenue_VenueExists(t *testing.T) {
-	db2, mock, err := sqlmock.New()
+	db2, mock, err := helper.MockDatabase()
 	assert.NoError(t, err)
 	defer db2.Close()
-
-	db.DB = db2
 
 	fv := viewmodels.FoodVenue{
 		Name:    "Venue",
@@ -52,11 +48,9 @@ func TestCreateVenue_VenueExists(t *testing.T) {
 }
 
 func TestCreateVenue_ArgumentsError(t *testing.T) {
-	db2, mock, err := sqlmock.New()
+	db2, mock, err := helper.MockDatabase()
 	assert.NoError(t, err)
 	defer db2.Close()
-
-	db.DB = db2
 
 	fv := viewmodels.FoodVenue{
 		Name:    "Venue",
@@ -72,11 +66,9 @@ func TestCreateVenue_ArgumentsError(t *testing.T) {
 }
 
 func TestCreateVenue_PrepareExec(t *testing.T) {
-	db2, mock, err := sqlmock.New()
+	db2, mock, err := helper.MockDatabase()
 	assert.NoError(t, err)
 	defer db2.Close()
-
-	db.DB = db2
 
 	testData := []struct {
 		err    error

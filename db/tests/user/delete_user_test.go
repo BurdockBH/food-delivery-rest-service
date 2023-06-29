@@ -2,7 +2,6 @@ package user
 
 import (
 	"fmt"
-	"github.com/BurdockBH/food-delivery-rest-service/db"
 	"github.com/BurdockBH/food-delivery-rest-service/db/user"
 	"github.com/BurdockBH/food-delivery-rest-service/router/helper"
 	"github.com/BurdockBH/food-delivery-rest-service/viewmodels"
@@ -12,11 +11,9 @@ import (
 )
 
 func TestDeleteUse_Success(t *testing.T) {
-	db2, mock, err := sqlmock.New()
+	db2, mock, err := helper.MockDatabase()
 	assert.NoError(t, err)
 	defer db2.Close()
-
-	db.DB = db2
 
 	loginUser := &viewmodels.UserLoginRequest{
 		Email:    "edocicak@gmail.com",
@@ -45,11 +42,9 @@ func TestDeleteUse_Success(t *testing.T) {
 }
 
 func TestDeleteUser_NoUser(t *testing.T) {
-	db2, mock, err := sqlmock.New()
+	db2, mock, err := helper.MockDatabase()
 	assert.NoError(t, err)
 	defer db2.Close()
-
-	db.DB = db2
 
 	loginUser := &viewmodels.UserLoginRequest{
 		Email:    "edocicak@gmail.com",
@@ -78,11 +73,9 @@ func TestDeleteUser_NoUser(t *testing.T) {
 }
 
 func TestDeleteUser_ArgumentsError(t *testing.T) {
-	db2, mock, err := sqlmock.New()
+	db2, mock, err := helper.MockDatabase()
 	assert.NoError(t, err)
 	defer db2.Close()
-
-	db.DB = db2
 
 	u := &viewmodels.UserLoginRequest{
 		Email:    "edocicak@gmail.com",
@@ -107,11 +100,9 @@ func TestDeleteUser_ArgumentsError(t *testing.T) {
 }
 
 func TestDeleteUser_PrepareExec(t *testing.T) {
-	db2, mock, err := sqlmock.New()
+	db2, mock, err := helper.MockDatabase()
 	assert.NoError(t, err)
 	defer db2.Close()
-
-	db.DB = db2
 
 	u := &viewmodels.UserLoginRequest{
 		Email:    "edocicak@gmail.com",
