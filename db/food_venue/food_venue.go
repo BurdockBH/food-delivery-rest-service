@@ -32,7 +32,7 @@ func CreateFoodVenue(fv *viewmodels.FoodVenue, email string) error {
 
 	if rowsAffected == 0 {
 		log.Printf("errror with rows affected: %v", err)
-		return errors.New(fmt.Sprintf("error with rows affected: %v", err))
+		return fmt.Errorf("error with rows affected: %v", err)
 	}
 
 	return nil
@@ -57,7 +57,7 @@ func DeleteFoodVenue(fv *viewmodels.FoodVenue) error {
 
 	if deleted != 1 {
 		log.Printf("Food venue with id %v does not exist", fv.ID)
-		return errors.New(fmt.Sprintf("Food venue with id %v does not exist", fv.ID))
+		return fmt.Errorf("Food venue with id %v does not exist", fv.ID)
 	}
 
 	return nil

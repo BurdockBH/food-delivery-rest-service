@@ -8,10 +8,10 @@ CREATE PROCEDURE `GetVenues`(
 BEGIN
     SELECT id, name, address, created_by, created_at, updated_at
     FROM food_venues
-    WHERE (inName = '' OR name LIKE CONCAT('%', inName, '%'))
-        AND (inAddress = '' OR address LIKE CONCAT('%', inAddress, '%'))
-        AND (inCreated_by_email = '' OR created_by = inCreated_by_email)
-       OR (inName = '' AND inAddress = '' AND inCreated_by_email = '');
+    WHERE (LENGTH(inName) = 0 OR name LIKE CONCAT('%', inName, '%'))
+        AND (LENGTH(inAddress) = 0 OR address LIKE CONCAT('%', inAddress, '%'))
+        AND (LENGTH(inCreated_by_email) = 0 OR created_by = inCreated_by_email)
+       OR (LENGTH(inName) = 0 AND LENGTH(inAddress) = 0 AND LENGTH(inCreated_by_email) = 0);
 END
 -- +goose StatementEnd
 

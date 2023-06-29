@@ -1,4 +1,4 @@
-package tests
+package user
 
 import (
 	"fmt"
@@ -10,29 +10,7 @@ import (
 	"testing"
 )
 
-func TestEditUser(t *testing.T) {
-	db2, mock, err := sqlmock.New()
-	assert.NoError(t, err)
-	defer db2.Close()
-
-	db.DB = db2
-
-	registerUser := &viewmodels.User{
-		Name:     "John Doe",
-		Email:    "edocicak@gmail.com",
-		Password: "password123",
-		Phone:    "1234567890",
-	}
-
-	mock.ExpectPrepare("CALL EditUser").ExpectQuery().WithArgs(
-		registerUser.Name, registerUser.Email, sqlmock.AnyArg(), registerUser.Phone, sqlmock.AnyArg()).WillReturnRows(sqlmock.NewRows([]string{"1"}).AddRow(1))
-
-	// Gives me user edocicak@gmail does not exist
-	err = user.EditUser(registerUser)
-	assert.NoError(t, err)
-}
-
-func TestEditUser_Fail(t *testing.T) {
+func TestGetUsers_Success(t *testing.T) {
 	db2, mock, err := sqlmock.New()
 	assert.NoError(t, err)
 	defer db2.Close()
@@ -46,20 +24,58 @@ func TestEditUser_Fail(t *testing.T) {
 		Phone:    "1234567890",
 	}
 
-	mock.ExpectPrepare("CALL EditUser").ExpectQuery().WithArgs(
-		u.Name, u.Email, sqlmock.AnyArg(), u.Phone, sqlmock.AnyArg()).WillReturnRows(sqlmock.NewRows([]string{"-1"}).AddRow(-1))
+	mock.ExpectPrepare("CALL GetUsersByDetails").ExpectQuery().WithArgs(
+		u.Name, u.Email, u.Phone).WillReturnRows(sqlmock.NewRows([]string{"1"}).AddRow(1))
 
-	err = user.EditUser(u)
-	assert.Error(t, err)
-
-	mock.ExpectPrepare("CALL EditUser").ExpectQuery().WithArgs(
-		u.Name, u.Email, sqlmock.AnyArg(), u.Phone, sqlmock.AnyArg()).WillReturnRows(sqlmock.NewRows([]string{"-2"}).AddRow(-2))
-
-	err = user.EditUser(u)
-	assert.Error(t, err)
+	_, err = user.GetUsers(u)
+	assert.NoError(t, err)
 }
 
-func TestEditUser_PrepareExec(t *testing.T) {
+func TestGetUsers_Fail(t *testing.T) {
+	db2, mock, err := sqlmock.New()
+	assert.NoError(t, err)
+	defer db2.Close()
+
+	db.DB = db2
+
+	u := &viewmodels.User{
+		Name:     "John Doe",
+		Email:    "edocicak@gmail.com",
+		Password: "password123",
+		Phone:    "1234567890",
+	}
+
+	mock.ExpectPrepare("CALL GetUsersByDetails").ExpectQuery().WithArgs(
+		u.Name, u.Email, u.Phone).WillReturnRows(sqlmock.NewRows([]string{"id", "email", "name", "password", "phone", "created_at", "updated_at"}))
+
+	users, err := user.GetUsers(u)
+	assert.Error(t, err)
+	assert.Nil(t, users)
+}
+
+func TestGetUsers_ArgumentError(t *testing.T) {
+	db2, mock, err := sqlmock.New()
+	assert.NoError(t, err)
+	defer db2.Close()
+
+	db.DB = db2
+
+	u := &viewmodels.User{
+		Name:     "John Doe",
+		Email:    "edocicak@gmail.com",
+		Password: "password123",
+		Phone:    "1234567890",
+	}
+
+	mock.ExpectPrepare("CALL GetUsersByDetails").ExpectQuery().WithArgs(
+		u.Name, sqlmock.AnyArg(), sqlmock.AnyArg()).WillReturnError(fmt.Errorf("Query 'CALL GetUsersByDetails(?, ?, ?)', arguments do not match: expected 3, but got 2 arguments"))
+
+	_, err = user.GetUsers(u)
+	assert.Error(t, err)
+	assert.EqualError(t, err, "Query 'CALL GetUsersByDetails(?, ?, ?)', arguments do not match: expected 3, but got 2 arguments")
+}
+
+func TestGetUsers_PrepareExec(t *testing.T) {
 	db2, mock, err := sqlmock.New()
 	assert.NoError(t, err)
 	defer db2.Close()
@@ -73,15 +89,15 @@ func TestEditUser_PrepareExec(t *testing.T) {
 		{
 			err: fmt.Errorf("preparation error"),
 			mockFn: func(err error) {
-				mock.ExpectPrepare("CALL EditUser").
+				mock.ExpectPrepare("CALL GetUsers").
 					WillReturnError(err)
 			},
 		},
 		{
 			err: fmt.Errorf("execution error"),
 			mockFn: func(err error) {
-				mock.ExpectPrepare("CALL EditUser").ExpectQuery().
-					WithArgs(sqlmock.AnyArg(), sqlmock.AnyArg(), sqlmock.AnyArg(), sqlmock.AnyArg(), sqlmock.AnyArg()).
+				mock.ExpectPrepare("CALL GetUsers").ExpectQuery().
+					WithArgs(sqlmock.AnyArg(), sqlmock.AnyArg(), sqlmock.AnyArg()).
 					WillReturnError(err)
 			},
 		},
@@ -96,10 +112,9 @@ func TestEditUser_PrepareExec(t *testing.T) {
 
 	for _, data := range testData {
 		data.mockFn(data.err)
-		err = user.EditUser(u)
+		_, err = user.GetUsers(u)
 		assert.NotNil(t, err, "expected error to not be nil, got %v", err)
 		assert.Equal(t, data.err, err, "expected error to be %v, got %v", data.err, err)
 		assert.Nil(t, mock.ExpectationsWereMet(), "expected all expectations to be met, got %v", mock.ExpectationsWereMet())
 	}
-
 }
