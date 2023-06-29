@@ -1,7 +1,6 @@
-package tests
+package food_venue
 
 import (
-	"errors"
 	"fmt"
 	"github.com/BurdockBH/food-delivery-rest-service/db"
 	"github.com/BurdockBH/food-delivery-rest-service/db/food_venue"
@@ -11,7 +10,7 @@ import (
 	"testing"
 )
 
-func TestGetFoodVenues_Success(t *testing.T) {
+func TestCreateVenue_Success(t *testing.T) {
 	db2, mock, err := sqlmock.New()
 	assert.NoError(t, err)
 	defer db2.Close()
@@ -23,16 +22,15 @@ func TestGetFoodVenues_Success(t *testing.T) {
 		Address: "Address",
 	}
 
-	mock.ExpectPrepare("CALL GetVenues").ExpectQuery().WithArgs(
-		sqlmock.AnyArg(), sqlmock.AnyArg(), sqlmock.AnyArg()).WillReturnRows(sqlmock.NewRows([]string{"id", "name", "address", "created_by", "created_at", "updated_at"}).AddRow(
-		1, "name", "address", "test@test.com", 1231452, 1123123))
+	mock.ExpectPrepare("CALL CreateFoodVenue").ExpectExec().
+		WithArgs(fv.Name, fv.Address, sqlmock.AnyArg()).WillReturnResult(sqlmock.NewResult(0, 1))
 
-	venues, err := food_venue.GetVenues(&fv)
+	err = food_venue.CreateFoodVenue(&fv, "email@example.com")
 	assert.NoError(t, err)
-	assert.NotNil(t, venues)
+	assert.NoError(t, mock.ExpectationsWereMet())
 }
 
-func TestGetFoodVenues_Failure(t *testing.T) {
+func TestCreateVenue_VenueExists(t *testing.T) {
 	db2, mock, err := sqlmock.New()
 	assert.NoError(t, err)
 	defer db2.Close()
@@ -44,15 +42,16 @@ func TestGetFoodVenues_Failure(t *testing.T) {
 		Address: "Address",
 	}
 
-	mock.ExpectPrepare("CALL GetVenues").ExpectQuery().WithArgs(
-		sqlmock.AnyArg(), sqlmock.AnyArg(), sqlmock.AnyArg()).WillReturnError(errors.New("database error"))
+	mock.ExpectPrepare("CALL CreateFoodVenue").ExpectExec().
+		WithArgs(fv.Name, fv.Address, sqlmock.AnyArg()).WillReturnResult(sqlmock.NewResult(0, 0))
 
-	venues, err := food_venue.GetVenues(&fv)
+	err = food_venue.CreateFoodVenue(&fv, "email@example.com")
 	assert.Error(t, err)
-	assert.Nil(t, venues)
+	assert.EqualError(t, err, "error with rows affected: <nil>")
+
 }
 
-func TestGetFoodVenues_ArgumentError(t *testing.T) {
+func TestCreateVenue_ArgumentsError(t *testing.T) {
 	db2, mock, err := sqlmock.New()
 	assert.NoError(t, err)
 	defer db2.Close()
@@ -64,16 +63,15 @@ func TestGetFoodVenues_ArgumentError(t *testing.T) {
 		Address: "Address",
 	}
 
-	mock.ExpectPrepare("CALL GetVenues").ExpectQuery().WithArgs(
-		sqlmock.AnyArg(), sqlmock.AnyArg(), sqlmock.AnyArg()).WillReturnError(fmt.Errorf("Query 'CALL GetVenues(?, ?, ?)', arguments do not match: expected 3, but got 2 arguments"))
+	mock.ExpectPrepare("CALL CreateFoodVenue").ExpectExec().WithArgs(
+		fv.Name, fv.Address, "email@example.com").WillReturnError(fmt.Errorf("Query 'CALL CreateFoodVenue(?, ?, ?)', arguments do not match: expected 3, but got 2 arguments"))
 
-	_, err = food_venue.GetVenues(&fv)
-
+	err = food_venue.CreateFoodVenue(&fv, "email@example.com")
 	assert.Error(t, err)
-	assert.EqualError(t, err, "Query 'CALL GetVenues(?, ?, ?)', arguments do not match: expected 3, but got 2 arguments")
+	assert.EqualError(t, err, "Query 'CALL CreateFoodVenue(?, ?, ?)', arguments do not match: expected 3, but got 2 arguments")
 }
 
-func TestGetFoodVenues_PrepareExec(t *testing.T) {
+func TestCreateVenue_PrepareExec(t *testing.T) {
 	db2, mock, err := sqlmock.New()
 	assert.NoError(t, err)
 	defer db2.Close()
@@ -87,14 +85,14 @@ func TestGetFoodVenues_PrepareExec(t *testing.T) {
 		{
 			err: fmt.Errorf("preparation error"),
 			mockFn: func(err error) {
-				mock.ExpectPrepare("CALL GetVenues").
+				mock.ExpectPrepare("CALL CreateFoodVenue").
 					WillReturnError(err)
 			},
 		},
 		{
 			err: fmt.Errorf("execution error"),
 			mockFn: func(err error) {
-				mock.ExpectPrepare("CALL GetVenues").ExpectQuery().
+				mock.ExpectPrepare("CALL CreateFoodVenue").ExpectExec().
 					WithArgs(sqlmock.AnyArg(), sqlmock.AnyArg(), sqlmock.AnyArg()).
 					WillReturnError(err)
 			},
@@ -108,7 +106,7 @@ func TestGetFoodVenues_PrepareExec(t *testing.T) {
 
 	for _, data := range testData {
 		data.mockFn(data.err)
-		_, err = food_venue.GetVenues(&fv)
+		err = food_venue.CreateFoodVenue(&fv, "email@example.com")
 		assert.NotNil(t, err, "expected error to not be nil, got %v", err)
 		assert.Equal(t, data.err, err, "expected error to be %v, got %v", data.err, err)
 		assert.Nil(t, mock.ExpectationsWereMet(), "expected all expectations to be met, got %v", mock.ExpectationsWereMet())

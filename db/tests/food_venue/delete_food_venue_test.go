@@ -1,4 +1,4 @@
-package tests
+package food_venue
 
 import (
 	"fmt"
@@ -30,7 +30,7 @@ func TestDeleteVenue_Success(t *testing.T) {
 	assert.NoError(t, mock.ExpectationsWereMet())
 }
 
-func TestDeleteVenue_VenueExists(t *testing.T) {
+func TestDeleteVenue_Failure(t *testing.T) {
 	db2, mock, err := sqlmock.New()
 	assert.NoError(t, err)
 	defer db2.Close()
