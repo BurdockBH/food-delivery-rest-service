@@ -24,7 +24,10 @@ func CreateFoodVenue(w http.ResponseWriter, r *http.Request) {
 	}
 	defer r.Body.Close()
 
-	claims := *helper.CheckToken(&w, r)
+	claims := helper.CheckToken(&w, r)
+	if claims == nil {
+		return
+	}
 
 	email := claims["email"].(string)
 
@@ -72,7 +75,9 @@ func DeleteFoodVenue(w http.ResponseWriter, r *http.Request) {
 	}
 	defer r.Body.Close()
 
-	_ = helper.CheckToken(&w, r)
+	if c := helper.CheckToken(&w, r); c == nil {
+		return
+	}
 
 	err = food_venue.DeleteFoodVenue(&foodVenue)
 	if err != nil {

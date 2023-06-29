@@ -4,10 +4,10 @@ CREATE PROCEDURE `CreateProduct`(
     IN inProductName VARCHAR(50),
     IN inProductDescription VARCHAR(255),
     IN inProductPrice FLOAT,
+    IN inProductQuantity INT,
     IN inFoodVenueName VARCHAR(50),
-    IN inFoodVenueAddress VARCHAR(50),
-    IN createdAt bigint,
-    IN updatedAt bigint
+    IN inFoodVenueAddress VARCHAR(50), git
+    IN inCreatedBy VARCHAR(50)
 )
 BEGIN
     DECLARE venueId int;
@@ -18,8 +18,8 @@ BEGIN
         SELECT -1;
     ELSE
         IF (SELECT id FROM products WHERE name = inProductName AND food_venue_id = venueId) IS NULL THEN
-            INSERT INTO products (name, description, price, food_venue_id, created_at, updated_at)
-            VALUES (inProductName, inProductDescription, inProductPrice, venueId, createdAt, updatedAt);
+            INSERT INTO products (name, description, price, quantity, food_venue_id, created_by)
+            VALUES (inProductName, inProductDescription, inProductPrice,inProductQuantity, venueId, inCreatedBy);
 
             SELECT 1;
         ELSE

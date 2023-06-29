@@ -124,7 +124,10 @@ func LoginUser(w http.ResponseWriter, r *http.Request) {
 
 // DeleteUser deletes a user from the database
 func DeleteUser(w http.ResponseWriter, r *http.Request) {
-	claims := *helper.CheckToken(&w, r)
+	claims := helper.CheckToken(&w, r)
+	if claims == nil {
+		return
+	}
 
 	var userLogin viewmodels.UserLoginRequest
 
@@ -183,7 +186,10 @@ func DeleteUser(w http.ResponseWriter, r *http.Request) {
 
 // EditUser edits a user in the database
 func EditUser(w http.ResponseWriter, r *http.Request) {
-	claims := *helper.CheckToken(&w, r)
+	claims := helper.CheckToken(&w, r)
+	if claims == nil {
+		return
+	}
 
 	var u viewmodels.User
 
