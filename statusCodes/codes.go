@@ -38,6 +38,9 @@ const (
 	FailedToGetProducts           = 35
 	SuccesfullyFetchedProducts    = 36
 	FailedToValidateItemIdRequest = 37
+	FailedToValidateOrder         = 38
+	FailedToOrderProduct          = 39
+	SuccesfullyOrderedProduct     = 40
 )
 
 var StatusCodes = map[int64]string{
@@ -78,4 +81,7 @@ var StatusCodes = map[int64]string{
 	FailedToGetProducts:           "Failed to get products",
 	SuccesfullyFetchedProducts:    "Products fetched successfully!",
 	FailedToValidateItemIdRequest: "Failed to validate item id request",
+	FailedToValidateOrder:         "Failed to validate order",
+	FailedToOrderProduct:          "Failed to order product",
+	SuccesfullyOrderedProduct:     "Product ordered successfully!",
 }

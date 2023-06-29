@@ -119,3 +119,32 @@ func GetProducts(venueId int64) ([]viewmodels.Product, error) {
 
 	return products, nil
 }
+
+func OrderProduct(order *viewmodels.Order, email string) error {
+	query := "CALL OrderProduct(?, ?, ?)"
+	st, err := db.DB.Prepare(query)
+	if err != nil {
+		log.Printf("Error preparing query: CALL OrderProduct(%v, %v, %v): %v", order.ProductID, email, order.Quantity, err)
+		return err
+	}
+	defer st.Close()
+
+	var ordered int
+	err = st.QueryRow(order.ProductID, email, order.Quantity).Scan(&ordered)
+	if err != nil {
+		log.Printf("Error executing query: CALL OrderProduct(%v, %v, %v): %v", order.ProductID, email, order.Quantity, err)
+		return err
+	}
+
+	if ordered == -2 {
+		log.Printf("Product with id %v does not exist", order.ProductID)
+		return fmt.Errorf("product with id %v does not exist", order.ProductID)
+	}
+
+	if ordered == -1 {
+		log.Printf("Not enough quantity of product with id %v", order.ProductID)
+		return fmt.Errorf("not enough quantity of product with id %v", order.ProductID)
+	}
+
+	return nil
+}
