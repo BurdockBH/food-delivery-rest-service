@@ -8,6 +8,7 @@ import (
 	"github.com/BurdockBH/food-delivery-rest-service/viewmodels"
 	"log"
 	"net/http"
+	"strconv"
 )
 
 func CreateProduct(w http.ResponseWriter, r *http.Request) {
@@ -205,4 +206,57 @@ func GetProducts(w http.ResponseWriter, r *http.Request) {
 	})
 	log.Printf("Products fetched successfully")
 	helper.BaseResponse(w, response, http.StatusOK)
+}
+
+func OrderProduct(w http.ResponseWriter, r *http.Request) {
+	var order viewmodels.Order
+	err := json.NewDecoder(r.Body).Decode(&order)
+	if err != nil {
+		log.Println("Failed to decode request body: ", err)
+		response, _ := json.Marshal(viewmodels.BaseResponse{
+			StatusCode: statusCodes.FailedToDecodeRequestBody,
+			Message:    statusCodes.StatusCodes[statusCodes.FailedToDecodeRequestBody],
+		})
+		helper.BaseResponse(w, response, http.StatusBadRequest)
+		return
+	}
+	defer r.Body.Close()
+
+	claims := helper.CheckToken(&w, r)
+	if claims == nil {
+		return
+	}
+
+	email := claims["email"].(string)
+
+	err = order.ValidateOrder()
+	if err != nil {
+		log.Println("Failed to validate request body: ", err)
+		response, _ := json.Marshal(viewmodels.BaseResponse{
+			StatusCode: statusCodes.FailedToValidateOrder,
+			Message:    statusCodes.StatusCodes[statusCodes.FailedToValidateOrder],
+		})
+		helper.BaseResponse(w, response, http.StatusBadRequest)
+		return
+	}
+
+	err = product.OrderProduct(&order, email)
+	if err != nil {
+		log.Println("Failed to order product: ", err)
+		response, _ := json.Marshal(viewmodels.BaseResponse{
+			StatusCode: statusCodes.FailedToOrderProduct,
+			Message:    statusCodes.StatusCodes[statusCodes.FailedToOrderProduct] + ":" + err.Error(),
+		})
+		helper.BaseResponse(w, response, http.StatusInternalServerError)
+		return
+	}
+
+	response, _ := json.Marshal(viewmodels.BaseResponse{
+		StatusCode: statusCodes.SuccesfullyOrderedProduct,
+		Message:    statusCodes.StatusCodes[statusCodes.SuccesfullyOrderedProduct] + " id: " + strconv.FormatInt(order.ProductID, 10),
+	})
+
+	log.Printf("Product %s ordered successfully", string(order.ID))
+	helper.BaseResponse(w, response, http.StatusOK)
+
 }

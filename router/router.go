@@ -29,6 +29,7 @@ func InitializeRouter() *http.ServeMux {
 	router.HandleFunc("/product/delete", middlewares.Chain(middlewares.Delete)(product.DeleteProduct))
 	router.HandleFunc("/product/edit", middlewares.Chain(middlewares.Put)(product.EditProduct))
 	router.HandleFunc("/products/get", middlewares.Chain(middlewares.Get)(product.GetProducts))
+	router.HandleFunc("/product/order", middlewares.Chain(middlewares.Post)(product.OrderProduct))
 
 	return router
 }
