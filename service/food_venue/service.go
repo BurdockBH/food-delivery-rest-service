@@ -11,6 +11,13 @@ import (
 )
 
 func CreateFoodVenue(w http.ResponseWriter, r *http.Request) {
+	claims := helper.CheckToken(&w, r)
+	if claims == nil {
+		return
+	}
+
+	email := claims["email"].(string)
+
 	var foodVenue viewmodels.FoodVenue
 	err := json.NewDecoder(r.Body).Decode(&foodVenue)
 	if err != nil {
@@ -23,13 +30,6 @@ func CreateFoodVenue(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	defer r.Body.Close()
-
-	claims := helper.CheckToken(&w, r)
-	if claims == nil {
-		return
-	}
-
-	email := claims["email"].(string)
 
 	err = foodVenue.ValidateFoodVenue()
 	if err != nil {
@@ -62,6 +62,10 @@ func CreateFoodVenue(w http.ResponseWriter, r *http.Request) {
 }
 
 func DeleteFoodVenue(w http.ResponseWriter, r *http.Request) {
+	if c := helper.CheckToken(&w, r); c == nil {
+		return
+	}
+
 	var foodVenue viewmodels.FoodVenue
 	err := json.NewDecoder(r.Body).Decode(&foodVenue)
 	if err != nil {
@@ -74,10 +78,6 @@ func DeleteFoodVenue(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	defer r.Body.Close()
-
-	if c := helper.CheckToken(&w, r); c == nil {
-		return
-	}
 
 	err = food_venue.DeleteFoodVenue(&foodVenue)
 	if err != nil {

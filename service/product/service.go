@@ -11,6 +11,13 @@ import (
 )
 
 func CreateProduct(w http.ResponseWriter, r *http.Request) {
+	claims := helper.CheckToken(&w, r)
+	if claims == nil {
+		return
+	}
+
+	email := claims["email"].(string)
+
 	var p viewmodels.Product
 	err := json.NewDecoder(r.Body).Decode(&p)
 	if err != nil {
@@ -23,13 +30,6 @@ func CreateProduct(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	defer r.Body.Close()
-
-	claims := helper.CheckToken(&w, r)
-	if claims == nil {
-		return
-	}
-
-	email := claims["email"].(string)
 
 	err = p.ValidateProduct()
 	if err != nil {
@@ -62,6 +62,11 @@ func CreateProduct(w http.ResponseWriter, r *http.Request) {
 }
 
 func DeleteProduct(w http.ResponseWriter, r *http.Request) {
+	claims := helper.CheckToken(&w, r)
+	if claims == nil {
+		return
+	}
+
 	var id viewmodels.ItemIdRequest
 	err := json.NewDecoder(r.Body).Decode(&id)
 	if err != nil {
@@ -87,11 +92,6 @@ func DeleteProduct(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	claims := helper.CheckToken(&w, r)
-	if claims == nil {
-		return
-	}
-
 	err = product.DeleteProduct(id.Id)
 	if err != nil {
 		log.Println("Failed to delete product: ", err)
@@ -112,6 +112,10 @@ func DeleteProduct(w http.ResponseWriter, r *http.Request) {
 }
 
 func EditProduct(w http.ResponseWriter, r *http.Request) {
+	if c := helper.CheckToken(&w, r); c == nil {
+		return
+	}
+
 	var p viewmodels.Product
 	err := json.NewDecoder(r.Body).Decode(&p)
 	if err != nil {
@@ -133,10 +137,6 @@ func EditProduct(w http.ResponseWriter, r *http.Request) {
 			Message:    statusCodes.StatusCodes[statusCodes.FailedToValidateProduct],
 		})
 		helper.BaseResponse(w, response, http.StatusBadRequest)
-		return
-	}
-
-	if c := helper.CheckToken(&w, r); c == nil {
 		return
 	}
 
