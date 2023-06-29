@@ -3,19 +3,17 @@ package product
 import (
 	"errors"
 	"fmt"
-	"github.com/BurdockBH/food-delivery-rest-service/db"
 	"github.com/BurdockBH/food-delivery-rest-service/db/product"
+	"github.com/BurdockBH/food-delivery-rest-service/router/helper"
 	"github.com/DATA-DOG/go-sqlmock"
 	"github.com/stretchr/testify/assert"
 	"testing"
 )
 
 func TestGetProducts_Success(t *testing.T) {
-	db2, mock, err := sqlmock.New()
+	db2, mock, err := helper.MockDatabase()
 	assert.NoError(t, err)
 	defer db2.Close()
-
-	db.DB = db2
 
 	mock.ExpectPrepare("CALL GetProducts").ExpectQuery().WithArgs(
 		sqlmock.AnyArg()).WillReturnRows(sqlmock.NewRows([]string{
@@ -28,11 +26,9 @@ func TestGetProducts_Success(t *testing.T) {
 }
 
 func TestGetProducts_Failure(t *testing.T) {
-	db2, mock, err := sqlmock.New()
+	db2, mock, err := helper.MockDatabase()
 	assert.NoError(t, err)
 	defer db2.Close()
-
-	db.DB = db2
 
 	mock.ExpectPrepare("CALL GetProducts").ExpectQuery().WithArgs(
 		sqlmock.AnyArg()).WillReturnError(errors.New("database error"))
@@ -44,11 +40,9 @@ func TestGetProducts_Failure(t *testing.T) {
 }
 
 func TestGetProducts_ArgumentsError(t *testing.T) {
-	db2, mock, err := sqlmock.New()
+	db2, mock, err := helper.MockDatabase()
 	assert.NoError(t, err)
 	defer db2.Close()
-
-	db.DB = db2
 
 	mock.ExpectPrepare("CALL GetProducts").ExpectQuery().WithArgs(
 		sqlmock.AnyArg()).WillReturnError(fmt.Errorf("Query 'CALL GetProducts(?)', arguments do not match: expected 2, but got 1 arguments"))
@@ -59,11 +53,9 @@ func TestGetProducts_ArgumentsError(t *testing.T) {
 }
 
 func TestGetProducts_PrepareExec(t *testing.T) {
-	db2, mock, err := sqlmock.New()
+	db2, mock, err := helper.MockDatabase()
 	assert.NoError(t, err)
 	defer db2.Close()
-
-	db.DB = db2
 
 	testData := []struct {
 		err    error

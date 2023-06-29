@@ -2,8 +2,8 @@ package user
 
 import (
 	"fmt"
-	"github.com/BurdockBH/food-delivery-rest-service/db"
 	"github.com/BurdockBH/food-delivery-rest-service/db/user"
+	"github.com/BurdockBH/food-delivery-rest-service/router/helper"
 	"github.com/BurdockBH/food-delivery-rest-service/viewmodels"
 	"github.com/DATA-DOG/go-sqlmock"
 	"github.com/stretchr/testify/assert"
@@ -11,11 +11,9 @@ import (
 )
 
 func TestGetUsers_Success(t *testing.T) {
-	db2, mock, err := sqlmock.New()
+	db2, mock, err := helper.MockDatabase()
 	assert.NoError(t, err)
 	defer db2.Close()
-
-	db.DB = db2
 
 	u := &viewmodels.User{
 		Name:     "John Doe",
@@ -32,11 +30,9 @@ func TestGetUsers_Success(t *testing.T) {
 }
 
 func TestGetUsers_Fail(t *testing.T) {
-	db2, mock, err := sqlmock.New()
+	db2, mock, err := helper.MockDatabase()
 	assert.NoError(t, err)
 	defer db2.Close()
-
-	db.DB = db2
 
 	u := &viewmodels.User{
 		Name:     "John Doe",
@@ -54,11 +50,9 @@ func TestGetUsers_Fail(t *testing.T) {
 }
 
 func TestGetUsers_ArgumentError(t *testing.T) {
-	db2, mock, err := sqlmock.New()
+	db2, mock, err := helper.MockDatabase()
 	assert.NoError(t, err)
 	defer db2.Close()
-
-	db.DB = db2
 
 	u := &viewmodels.User{
 		Name:     "John Doe",
@@ -76,11 +70,9 @@ func TestGetUsers_ArgumentError(t *testing.T) {
 }
 
 func TestGetUsers_PrepareExec(t *testing.T) {
-	db2, mock, err := sqlmock.New()
+	db2, mock, err := helper.MockDatabase()
 	assert.NoError(t, err)
 	defer db2.Close()
-
-	db.DB = db2
 
 	testData := []struct {
 		err    error

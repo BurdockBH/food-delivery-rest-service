@@ -1,11 +1,14 @@
 package helper
 
 import (
+	"database/sql"
 	"encoding/json"
 	"fmt"
 	"github.com/BurdockBH/food-delivery-rest-service/config"
+	"github.com/BurdockBH/food-delivery-rest-service/db"
 	"github.com/BurdockBH/food-delivery-rest-service/statusCodes"
 	"github.com/BurdockBH/food-delivery-rest-service/viewmodels"
+	"github.com/DATA-DOG/go-sqlmock"
 	"github.com/golang-jwt/jwt/v5"
 	"golang.org/x/crypto/bcrypt"
 	"log"
@@ -105,4 +108,10 @@ func CheckToken(w *http.ResponseWriter, r *http.Request) jwt.MapClaims {
 	}
 
 	return claims
+}
+func MockDatabase() (*sql.DB, sqlmock.Sqlmock, error) {
+	db2, mock, err := sqlmock.New()
+	db.DB = db2
+
+	return db2, mock, err
 }
