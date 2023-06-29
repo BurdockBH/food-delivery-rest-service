@@ -12,7 +12,7 @@ func CreateProduct(product *viewmodels.Product, email string) error {
 	query := "CALL CreateProduct(?, ?, ?, ?, ?, ? ,?)"
 	st, err := db.DB.Prepare(query)
 	if err != nil {
-		log.Printf("Error preparing query: CALL CreateProduct(%v, %v, %v, %v, %v, %v, %): %v", product.Name, product.Description, product.Price, product.Quantity, product.FoodVenue.Name, product.FoodVenue.Address, email, err)
+		log.Printf("Error preparing query: CALL CreateProduct(%v, %v, %v, %v, %v, %v, %v): %v", product.Name, product.Description, product.Price, product.Quantity, product.FoodVenue.Name, product.FoodVenue.Address, email, err)
 		return err
 	}
 	defer st.Close()
@@ -26,12 +26,12 @@ func CreateProduct(product *viewmodels.Product, email string) error {
 
 	if created == 0 {
 		log.Printf("Product with name %v already exists in venue %v", product.Name, product.FoodVenue.Name)
-		return errors.New(fmt.Sprintf("product with name %v already exists in venue %v", product.Name, product.FoodVenue.Name))
+		return fmt.Errorf("product with name %v already exists in venue %v", product.Name, product.FoodVenue.Name)
 	}
 
 	if created == -1 {
 		log.Printf("There is no venue with name %v and address %v", product.FoodVenue.Name, product.FoodVenue.Address)
-		return errors.New(fmt.Sprintf("there is no venue with name %v and address %v", product.FoodVenue.Name, product.FoodVenue.Address))
+		return fmt.Errorf("there is no venue with name %v and address %v", product.FoodVenue.Name, product.FoodVenue.Address)
 	}
 
 	return nil
@@ -55,7 +55,7 @@ func DeleteProduct(id int64) error {
 
 	if deleted != 1 {
 		log.Printf("Product with id %v does not exist", id)
-		return errors.New(fmt.Sprintf("Product with id %v does not exist", id))
+		return fmt.Errorf("Product with id %v does not exist", id)
 	}
 
 	return nil
@@ -79,7 +79,7 @@ func EditProduct(product *viewmodels.Product) error {
 
 	if edited != 1 {
 		log.Printf("Product with id %v does not exist", product.ID)
-		return errors.New(fmt.Sprintf("Product with id %v does not exist", product.ID))
+		return fmt.Errorf("Product with id %v does not exist", product.ID)
 	}
 
 	return nil

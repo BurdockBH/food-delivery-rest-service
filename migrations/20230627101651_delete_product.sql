@@ -8,8 +8,6 @@ BEGIN
     IF (SELECT id FROM products WHERE id = inProductId) IS NOT NULL THEN
         DELETE FROM products WHERE id = inProductId;
         SELECT 1;
-    ELSE
-        SELECT 0;
     END IF;
 END
 -- +goose StatementEnd

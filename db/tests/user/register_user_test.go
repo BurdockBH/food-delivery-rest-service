@@ -1,4 +1,4 @@
-package tests
+package user
 
 import (
 	"fmt"
@@ -10,7 +10,7 @@ import (
 	"testing"
 )
 
-func TestGetUsers_Success(t *testing.T) {
+func TestRegisterUser_Success(t *testing.T) {
 	db2, mock, err := sqlmock.New()
 	assert.NoError(t, err)
 	defer db2.Close()
@@ -19,19 +19,21 @@ func TestGetUsers_Success(t *testing.T) {
 
 	u := &viewmodels.User{
 		Name:     "John Doe",
-		Email:    "edocicak@gmail.com",
+		Email:    "john.doe@example.com",
 		Password: "password123",
 		Phone:    "1234567890",
 	}
 
-	mock.ExpectPrepare("CALL GetUsersByDetails").ExpectQuery().WithArgs(
-		u.Name, u.Email, u.Phone).WillReturnRows(sqlmock.NewRows([]string{"1"}).AddRow(1))
+	mock.ExpectPrepare("CALL RegisterUser").ExpectQuery().
+		WithArgs(u.Name, u.Email, sqlmock.AnyArg(), u.Phone).
+		WillReturnRows(sqlmock.NewRows([]string{"1"}).AddRow(1))
 
-	_, err = user.GetUsers(u)
+	err = user.RegisterUser(u)
 	assert.NoError(t, err)
+	assert.NoError(t, mock.ExpectationsWereMet())
 }
 
-func TestGetUsers_Fail(t *testing.T) {
+func TestRegisterUser_UserExists(t *testing.T) {
 	db2, mock, err := sqlmock.New()
 	assert.NoError(t, err)
 	defer db2.Close()
@@ -40,21 +42,21 @@ func TestGetUsers_Fail(t *testing.T) {
 
 	u := &viewmodels.User{
 		Name:     "John Doe",
-		Email:    "edocicak@gmail.com",
+		Email:    "john.doe@example.com",
 		Password: "password123",
 		Phone:    "1234567890",
 	}
 
-	// Adjust the column names and types based on your query's result set
-	mock.ExpectPrepare("CALL GetUsersByDetails").ExpectQuery().WithArgs(
-		u.Name, u.Email, u.Phone).WillReturnRows(sqlmock.NewRows([]string{"id", "email", "name", "password", "phone", "created_at", "updated_at"}))
+	mock.ExpectPrepare("CALL RegisterUser").ExpectQuery().
+		WithArgs(u.Name, u.Email, sqlmock.AnyArg(), u.Phone).
+		WillReturnRows(sqlmock.NewRows([]string{"0"}).AddRow(0))
 
-	users, err := user.GetUsers(u)
+	err = user.RegisterUser(u)
 	assert.Error(t, err)
-	assert.Nil(t, users)
+	assert.EqualError(t, err, fmt.Sprintf("user with email %v or phone number %v already exists", u.Email, u.Phone))
 }
 
-func TestGetUsers_ArgumentError(t *testing.T) {
+func TestRegisterUser_ArgumentsError(t *testing.T) {
 	db2, mock, err := sqlmock.New()
 	assert.NoError(t, err)
 	defer db2.Close()
@@ -68,15 +70,15 @@ func TestGetUsers_ArgumentError(t *testing.T) {
 		Phone:    "1234567890",
 	}
 
-	mock.ExpectPrepare("CALL GetUsersByDetails").ExpectQuery().WithArgs(
-		u.Name, sqlmock.AnyArg(), sqlmock.AnyArg()).WillReturnError(fmt.Errorf("Query 'CALL GetUsersByDetails(?, ?, ?)', arguments do not match: expected 3, but got 2 arguments"))
+	mock.ExpectPrepare("CALL RegisterUser").ExpectQuery().WithArgs(
+		u.Name, sqlmock.AnyArg(), u.Phone, sqlmock.AnyArg(), sqlmock.AnyArg()).WillReturnError(fmt.Errorf("Query 'CALL RegisterUser(?, ?, ?, ?)', arguments do not match: expected 5, but got 4 arguments"))
 
-	_, err = user.GetUsers(u)
+	err = user.RegisterUser(u)
 	assert.Error(t, err)
-	assert.EqualError(t, err, "Query 'CALL GetUsersByDetails(?, ?, ?)', arguments do not match: expected 3, but got 2 arguments")
+	assert.EqualError(t, err, "Query 'CALL RegisterUser(?, ?, ?, ?)', arguments do not match: expected 5, but got 4 arguments")
 }
 
-func TestGetUsers_PrepareExec(t *testing.T) {
+func TestRegisterUser_PrepareExec(t *testing.T) {
 	db2, mock, err := sqlmock.New()
 	assert.NoError(t, err)
 	defer db2.Close()
@@ -90,15 +92,15 @@ func TestGetUsers_PrepareExec(t *testing.T) {
 		{
 			err: fmt.Errorf("preparation error"),
 			mockFn: func(err error) {
-				mock.ExpectPrepare("CALL GetUsers").
+				mock.ExpectPrepare("CALL RegisterUser").
 					WillReturnError(err)
 			},
 		},
 		{
 			err: fmt.Errorf("execution error"),
 			mockFn: func(err error) {
-				mock.ExpectPrepare("CALL GetUsers").ExpectQuery().
-					WithArgs(sqlmock.AnyArg(), sqlmock.AnyArg(), sqlmock.AnyArg()).
+				mock.ExpectPrepare("CALL RegisterUser").ExpectQuery().
+					WithArgs(sqlmock.AnyArg(), sqlmock.AnyArg(), sqlmock.AnyArg(), sqlmock.AnyArg()).
 					WillReturnError(err)
 			},
 		},
@@ -113,7 +115,7 @@ func TestGetUsers_PrepareExec(t *testing.T) {
 
 	for _, data := range testData {
 		data.mockFn(data.err)
-		_, err = user.GetUsers(u)
+		err = user.RegisterUser(u)
 		assert.NotNil(t, err, "expected error to not be nil, got %v", err)
 		assert.Equal(t, data.err, err, "expected error to be %v, got %v", data.err, err)
 		assert.Nil(t, mock.ExpectationsWereMet(), "expected all expectations to be met, got %v", mock.ExpectationsWereMet())

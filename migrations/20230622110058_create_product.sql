@@ -6,7 +6,7 @@ CREATE PROCEDURE `CreateProduct`(
     IN inProductPrice FLOAT,
     IN inProductQuantity INT,
     IN inFoodVenueName VARCHAR(50),
-    IN inFoodVenueAddress VARCHAR(50), git
+    IN inFoodVenueAddress VARCHAR(50),
     IN inCreatedBy VARCHAR(50)
 )
 BEGIN

@@ -16,4 +16,3 @@ END
 -- +goose StatementBegin
 DROP PROCEDURE IF EXISTS `RegisterUser`;
 -- +goose StatementEnd
-a
