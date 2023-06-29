@@ -39,7 +39,7 @@ func RegisterUser(u *viewmodels.User) error {
 
 	if created != 1 {
 		log.Printf("User with email: %v or phone number: %v already exists", u.Email, u.Phone)
-		return errors.New(fmt.Sprintf("user with email %v or phone number %v already exists", u.Email, u.Phone))
+		return fmt.Errorf("user with email %v or phone number %v already exists", u.Email, u.Phone)
 	}
 
 	return nil
@@ -60,7 +60,7 @@ func LoginUser(u *viewmodels.UserLoginRequest) error {
 	err = st.QueryRow(u.Email).Scan(&password)
 	if err != nil && err.Error() == "sql: no rows in result set" {
 		log.Printf("User with email %v does not exist", u.Email)
-		return errors.New(fmt.Sprintf("user with email %v does not exist", u.Email))
+		return fmt.Errorf("user with email %v does not exist", u.Email)
 	} else if err != nil { // other error
 		log.Println("Error executing query:", err)
 		return err
@@ -81,7 +81,7 @@ func DeleteUser(u *viewmodels.UserLoginRequest) error {
 	err := db.DB.QueryRow(passwordQuery, u.Email).Scan(&password)
 	if err != nil {
 		log.Println("User does not exist:", err)
-		return errors.New(fmt.Sprintf("user %v does not exist", u.Email))
+		return fmt.Errorf("user %v does not exist", u.Email)
 	}
 
 	err = helper.CompareHashedPassword(password, u.Password)
@@ -107,7 +107,7 @@ func DeleteUser(u *viewmodels.UserLoginRequest) error {
 
 	if deleted != 1 {
 		log.Printf("Couldn't delete %v. No rows affected\n", u.Email)
-		return errors.New(fmt.Sprintf("couldn't delete user %v. No rows affected", u.Email))
+		return fmt.Errorf("couldn't delete user %v. No rows affected", u.Email)
 	}
 
 	return nil
@@ -138,10 +138,10 @@ func EditUser(u *viewmodels.User) error {
 
 	if updated == -1 {
 		log.Printf("User with email %v does not exist", u.Email)
-		return errors.New(fmt.Sprintf("user with email %v does not exist", u.Email))
+		return fmt.Errorf("user with email %v does not exist", u.Email)
 	} else if updated == -2 {
 		log.Printf("User with phone number: %v already exists", u.Phone)
-		return errors.New(fmt.Sprintf("user with phone number: %v already exists", u.Phone))
+		return fmt.Errorf("user with phone number: %v already exists", u.Phone)
 	}
 
 	return nil
