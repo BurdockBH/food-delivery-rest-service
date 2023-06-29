@@ -44,8 +44,7 @@ func TestGetUsers_Fail(t *testing.T) {
 		Password: "password123",
 		Phone:    "1234567890",
 	}
-
-	// Adjust the column names and types based on your query's result set
+	
 	mock.ExpectPrepare("CALL GetUsersByDetails").ExpectQuery().WithArgs(
 		u.Name, u.Email, u.Phone).WillReturnRows(sqlmock.NewRows([]string{"id", "email", "name", "password", "phone", "created_at", "updated_at"}))
 
