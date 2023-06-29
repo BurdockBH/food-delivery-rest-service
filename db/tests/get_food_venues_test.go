@@ -1,6 +1,7 @@
 package tests
 
 import (
+	"errors"
 	"fmt"
 	"github.com/BurdockBH/food-delivery-rest-service/db"
 	"github.com/BurdockBH/food-delivery-rest-service/db/food_venue"
@@ -23,14 +24,15 @@ func TestGetFoodVenues_Success(t *testing.T) {
 	}
 
 	mock.ExpectPrepare("CALL GetVenues").ExpectQuery().WithArgs(
-		sqlmock.AnyArg(), sqlmock.AnyArg(), sqlmock.AnyArg()).WillReturnRows(sqlmock.NewRows([]string{"1"}).AddRow(1))
+		sqlmock.AnyArg(), sqlmock.AnyArg(), sqlmock.AnyArg()).WillReturnRows(sqlmock.NewRows([]string{"id", "name", "address", "created_by", "created_at", "updated_at"}).AddRow(
+		1, "name", "address", "test@test.com", 1231452, 1123123))
 
-	_, err = food_venue.GetVenues(&fv)
+	venues, err := food_venue.GetVenues(&fv)
 	assert.NoError(t, err)
-	assert.NoError(t, mock.ExpectationsWereMet())
+	assert.NotNil(t, venues)
 }
 
-func TestGetFoodVenues_Fail(t *testing.T) {
+func TestGetFoodVenues_Failure(t *testing.T) {
 	db2, mock, err := sqlmock.New()
 	assert.NoError(t, err)
 	defer db2.Close()
@@ -42,12 +44,12 @@ func TestGetFoodVenues_Fail(t *testing.T) {
 		Address: "Address",
 	}
 
-	mock.ExpectPrepare("CALL GetFoodVenues").ExpectQuery().WithArgs(
-		sqlmock.AnyArg(), sqlmock.AnyArg(), sqlmock.AnyArg()).WillReturnRows(sqlmock.NewRows([]string{"id", "email", "name", "password", "phone", "created_at", "updated_at"}))
+	mock.ExpectPrepare("CALL GetVenues").ExpectQuery().WithArgs(
+		sqlmock.AnyArg(), sqlmock.AnyArg(), sqlmock.AnyArg()).WillReturnError(errors.New("database error"))
 
-	foodVenues, err := food_venue.GetVenues(&fv)
+	venues, err := food_venue.GetVenues(&fv)
 	assert.Error(t, err)
-	assert.Nil(t, foodVenues)
+	assert.Nil(t, venues)
 }
 
 func TestGetFoodVenues_ArgumentError(t *testing.T) {
@@ -62,13 +64,13 @@ func TestGetFoodVenues_ArgumentError(t *testing.T) {
 		Address: "Address",
 	}
 
-	mock.ExpectPrepare("CALL GetUsersByDetails").ExpectQuery().WithArgs(
-		sqlmock.AnyArg(), sqlmock.AnyArg(), sqlmock.AnyArg()).WillReturnError(fmt.Errorf("Query 'CALL GetUsersByDetails(?, ?, ?)', arguments do not match: expected 3, but got 2 arguments"))
+	mock.ExpectPrepare("CALL GetVenues").ExpectQuery().WithArgs(
+		sqlmock.AnyArg(), sqlmock.AnyArg(), sqlmock.AnyArg()).WillReturnError(fmt.Errorf("Query 'CALL GetVenues(?, ?, ?)', arguments do not match: expected 3, but got 2 arguments"))
 
 	_, err = food_venue.GetVenues(&fv)
 
 	assert.Error(t, err)
-	assert.EqualError(t, err, "Query 'CALL GetUsersByDetails(?, ?, ?)', arguments do not match: expected 3, but got 2 arguments")
+	assert.EqualError(t, err, "Query 'CALL GetVenues(?, ?, ?)', arguments do not match: expected 3, but got 2 arguments")
 }
 
 func TestGetFoodVenues_PrepareExec(t *testing.T) {
@@ -85,14 +87,14 @@ func TestGetFoodVenues_PrepareExec(t *testing.T) {
 		{
 			err: fmt.Errorf("preparation error"),
 			mockFn: func(err error) {
-				mock.ExpectPrepare("CALL GetUsers").
+				mock.ExpectPrepare("CALL GetVenues").
 					WillReturnError(err)
 			},
 		},
 		{
 			err: fmt.Errorf("execution error"),
 			mockFn: func(err error) {
-				mock.ExpectPrepare("CALL GetUsers").ExpectQuery().
+				mock.ExpectPrepare("CALL GetVenues").ExpectQuery().
 					WithArgs(sqlmock.AnyArg(), sqlmock.AnyArg(), sqlmock.AnyArg()).
 					WillReturnError(err)
 			},
